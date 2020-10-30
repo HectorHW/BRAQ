@@ -19,7 +19,6 @@
 // Ambiguous reference in cref attribute
 #pragma warning disable 419
 
-namespace BRAQ_grammar {
 using System;
 using System.IO;
 using System.Text;
@@ -37,27 +36,25 @@ public partial class BRAQParser : Parser {
 	protected static DFA[] decisionToDFA;
 	protected static PredictionContextCache sharedContextCache = new PredictionContextCache();
 	public const int
-		COMMENT=1, SHORT_EQUALS=2, EQUALS=3, LBRACKET=4, RBRACKET=5, LSQBRACKET=6, 
-		RSQBRACKET=7, LBRACE=8, RBRACE=9, SEMICOLON=10, DOUBLE_STAR=11, PLUS=12, 
-		MINUS=13, STAR=14, SLASH=15, DEF=16, VAR=17, WHILE=18, NUMBER=19, FLOAT_NUMBER=20, 
-		ID=21, OTHER_OP=22, STRING=23, WHITESPACE=24, NEWLINE=25;
+		EQUALS=1, PLUS=2, MINUS=3, STAR=4, SLASH=5, MODULUS=6, NUMBER=7, LBRACKET=8, 
+		RBRACKET=9, SEMICOLON=10, NEWLINE=11, SPACE=12, VAR=13, PRINT=14, ID=15;
 	public const int
-		RULE_program = 0, RULE_block = 1, RULE_stmt = 2, RULE_var_stmt = 3, RULE_expr_stmt = 4, 
-		RULE_expr = 5, RULE_group = 6, RULE_literal = 7;
+		RULE_program = 0, RULE_stmt = 1, RULE_var_stmt_base = 2, RULE_print_stmt_base = 3, 
+		RULE_assign_stmt_base = 4, RULE_expr = 5, RULE_group = 6, RULE_literal = 7, 
+		RULE_var_node = 8;
 	public static readonly string[] ruleNames = {
-		"program", "block", "stmt", "var_stmt", "expr_stmt", "expr", "group", 
-		"literal"
+		"program", "stmt", "var_stmt_base", "print_stmt_base", "assign_stmt_base", 
+		"expr", "group", "literal", "var_node"
 	};
 
 	private static readonly string[] _LiteralNames = {
-		null, null, null, "'='", "'('", "')'", "'['", "']'", "'{'", "'}'", "';'", 
-		"'**'", "'+'", "'-'", "'*'", "'/'", "'def'", "'var'", "'while'"
+		null, "'='", "'+'", "'-'", "'*'", "'/'", "'%'", null, "'('", "')'", "';'", 
+		null, null, "'var'", "'print'"
 	};
 	private static readonly string[] _SymbolicNames = {
-		null, "COMMENT", "SHORT_EQUALS", "EQUALS", "LBRACKET", "RBRACKET", "LSQBRACKET", 
-		"RSQBRACKET", "LBRACE", "RBRACE", "SEMICOLON", "DOUBLE_STAR", "PLUS", 
-		"MINUS", "STAR", "SLASH", "DEF", "VAR", "WHILE", "NUMBER", "FLOAT_NUMBER", 
-		"ID", "OTHER_OP", "STRING", "WHITESPACE", "NEWLINE"
+		null, "EQUALS", "PLUS", "MINUS", "STAR", "SLASH", "MODULUS", "NUMBER", 
+		"LBRACKET", "RBRACKET", "SEMICOLON", "NEWLINE", "SPACE", "VAR", "PRINT", 
+		"ID"
 	};
 	public static readonly IVocabulary DefaultVocabulary = new Vocabulary(_LiteralNames, _SymbolicNames);
 
@@ -99,12 +96,6 @@ public partial class BRAQParser : Parser {
 		public StmtContext stmt(int i) {
 			return GetRuleContext<StmtContext>(i);
 		}
-		public BlockContext[] block() {
-			return GetRuleContexts<BlockContext>();
-		}
-		public BlockContext block(int i) {
-			return GetRuleContext<BlockContext>(i);
-		}
 		public ProgramContext(ParserRuleContext parent, int invokingState)
 			: base(parent, invokingState)
 		{
@@ -133,120 +124,22 @@ public partial class BRAQParser : Parser {
 		try {
 			EnterOuterAlt(_localctx, 1);
 			{
-			State = 20;
-			ErrorHandler.Sync(this);
-			_la = TokenStream.LA(1);
-			while ((((_la) & ~0x3f) == 0 && ((1L << _la) & ((1L << LBRACKET) | (1L << LBRACE) | (1L << VAR) | (1L << NUMBER) | (1L << FLOAT_NUMBER) | (1L << ID) | (1L << STRING))) != 0)) {
-				{
-				State = 18;
-				ErrorHandler.Sync(this);
-				switch (TokenStream.LA(1)) {
-				case LBRACKET:
-				case VAR:
-				case NUMBER:
-				case FLOAT_NUMBER:
-				case ID:
-				case STRING:
-					{
-					State = 16; stmt();
-					}
-					break;
-				case LBRACE:
-					{
-					State = 17; block();
-					}
-					break;
-				default:
-					throw new NoViableAltException(this);
-				}
-				}
-				State = 22;
-				ErrorHandler.Sync(this);
-				_la = TokenStream.LA(1);
-			}
-			State = 23; Match(Eof);
-			}
-		}
-		catch (RecognitionException re) {
-			_localctx.exception = re;
-			ErrorHandler.ReportError(this, re);
-			ErrorHandler.Recover(this, re);
-		}
-		finally {
-			ExitRule();
-		}
-		return _localctx;
-	}
-
-	public partial class BlockContext : ParserRuleContext {
-		public ITerminalNode LBRACE() { return GetToken(BRAQParser.LBRACE, 0); }
-		public ITerminalNode RBRACE() { return GetToken(BRAQParser.RBRACE, 0); }
-		public ITerminalNode[] NEWLINE() { return GetTokens(BRAQParser.NEWLINE); }
-		public ITerminalNode NEWLINE(int i) {
-			return GetToken(BRAQParser.NEWLINE, i);
-		}
-		public StmtContext[] stmt() {
-			return GetRuleContexts<StmtContext>();
-		}
-		public StmtContext stmt(int i) {
-			return GetRuleContext<StmtContext>(i);
-		}
-		public BlockContext(ParserRuleContext parent, int invokingState)
-			: base(parent, invokingState)
-		{
-		}
-		public override int RuleIndex { get { return RULE_block; } }
-		public override void EnterRule(IParseTreeListener listener) {
-			IBRAQParserListener typedListener = listener as IBRAQParserListener;
-			if (typedListener != null) typedListener.EnterBlock(this);
-		}
-		public override void ExitRule(IParseTreeListener listener) {
-			IBRAQParserListener typedListener = listener as IBRAQParserListener;
-			if (typedListener != null) typedListener.ExitBlock(this);
-		}
-		public override TResult Accept<TResult>(IParseTreeVisitor<TResult> visitor) {
-			IBRAQParserVisitor<TResult> typedVisitor = visitor as IBRAQParserVisitor<TResult>;
-			if (typedVisitor != null) return typedVisitor.VisitBlock(this);
-			else return visitor.VisitChildren(this);
-		}
-	}
-
-	[RuleVersion(0)]
-	public BlockContext block() {
-		BlockContext _localctx = new BlockContext(Context, State);
-		EnterRule(_localctx, 2, RULE_block);
-		int _la;
-		try {
-			EnterOuterAlt(_localctx, 1);
 			{
-			State = 25; Match(LBRACE);
-			State = 29;
+			State = 21;
 			ErrorHandler.Sync(this);
 			_la = TokenStream.LA(1);
-			while (_la==NEWLINE) {
+			while ((((_la) & ~0x3f) == 0 && ((1L << _la) & ((1L << VAR) | (1L << PRINT) | (1L << ID))) != 0)) {
 				{
 				{
-				State = 26; Match(NEWLINE);
+				State = 18; stmt();
 				}
 				}
-				State = 31;
+				State = 23;
 				ErrorHandler.Sync(this);
 				_la = TokenStream.LA(1);
 			}
-			State = 35;
-			ErrorHandler.Sync(this);
-			_la = TokenStream.LA(1);
-			while ((((_la) & ~0x3f) == 0 && ((1L << _la) & ((1L << LBRACKET) | (1L << VAR) | (1L << NUMBER) | (1L << FLOAT_NUMBER) | (1L << ID) | (1L << STRING))) != 0)) {
-				{
-				{
-				State = 32; stmt();
-				}
-				}
-				State = 37;
-				ErrorHandler.Sync(this);
-				_la = TokenStream.LA(1);
 			}
-			State = 38; Match(RBRACE);
+			State = 24; Match(Eof);
 			}
 		}
 		catch (RecognitionException re) {
@@ -261,12 +154,18 @@ public partial class BRAQParser : Parser {
 	}
 
 	public partial class StmtContext : ParserRuleContext {
+		public Var_stmt_baseContext containing_var;
+		public Print_stmt_baseContext containing_print;
+		public Assign_stmt_baseContext containing_assign;
 		public ITerminalNode SEMICOLON() { return GetToken(BRAQParser.SEMICOLON, 0); }
-		public Var_stmtContext var_stmt() {
-			return GetRuleContext<Var_stmtContext>(0);
+		public Var_stmt_baseContext var_stmt_base() {
+			return GetRuleContext<Var_stmt_baseContext>(0);
 		}
-		public Expr_stmtContext expr_stmt() {
-			return GetRuleContext<Expr_stmtContext>(0);
+		public Print_stmt_baseContext print_stmt_base() {
+			return GetRuleContext<Print_stmt_baseContext>(0);
+		}
+		public Assign_stmt_baseContext assign_stmt_base() {
+			return GetRuleContext<Assign_stmt_baseContext>(0);
 		}
 		public StmtContext(ParserRuleContext parent, int invokingState)
 			: base(parent, invokingState)
@@ -291,31 +190,32 @@ public partial class BRAQParser : Parser {
 	[RuleVersion(0)]
 	public StmtContext stmt() {
 		StmtContext _localctx = new StmtContext(Context, State);
-		EnterRule(_localctx, 4, RULE_stmt);
+		EnterRule(_localctx, 2, RULE_stmt);
 		try {
 			EnterOuterAlt(_localctx, 1);
 			{
-			State = 42;
+			State = 29;
 			ErrorHandler.Sync(this);
 			switch (TokenStream.LA(1)) {
 			case VAR:
 				{
-				State = 40; var_stmt();
+				State = 26; _localctx.containing_var = var_stmt_base();
 				}
 				break;
-			case LBRACKET:
-			case NUMBER:
-			case FLOAT_NUMBER:
-			case ID:
-			case STRING:
+			case PRINT:
 				{
-				State = 41; expr_stmt();
+				State = 27; _localctx.containing_print = print_stmt_base();
+				}
+				break;
+			case ID:
+				{
+				State = 28; _localctx.containing_assign = assign_stmt_base();
 				}
 				break;
 			default:
 				throw new NoViableAltException(this);
 			}
-			State = 44; Match(SEMICOLON);
+			State = 31; Match(SEMICOLON);
 			}
 		}
 		catch (RecognitionException re) {
@@ -329,8 +229,8 @@ public partial class BRAQParser : Parser {
 		return _localctx;
 	}
 
-	public partial class Var_stmtContext : ParserRuleContext {
-		public IToken varname;
+	public partial class Var_stmt_baseContext : ParserRuleContext {
+		public IToken id_name;
 		public ExprContext assignee;
 		public ITerminalNode VAR() { return GetToken(BRAQParser.VAR, 0); }
 		public ITerminalNode ID() { return GetToken(BRAQParser.ID, 0); }
@@ -338,43 +238,43 @@ public partial class BRAQParser : Parser {
 		public ExprContext expr() {
 			return GetRuleContext<ExprContext>(0);
 		}
-		public Var_stmtContext(ParserRuleContext parent, int invokingState)
+		public Var_stmt_baseContext(ParserRuleContext parent, int invokingState)
 			: base(parent, invokingState)
 		{
 		}
-		public override int RuleIndex { get { return RULE_var_stmt; } }
+		public override int RuleIndex { get { return RULE_var_stmt_base; } }
 		public override void EnterRule(IParseTreeListener listener) {
 			IBRAQParserListener typedListener = listener as IBRAQParserListener;
-			if (typedListener != null) typedListener.EnterVar_stmt(this);
+			if (typedListener != null) typedListener.EnterVar_stmt_base(this);
 		}
 		public override void ExitRule(IParseTreeListener listener) {
 			IBRAQParserListener typedListener = listener as IBRAQParserListener;
-			if (typedListener != null) typedListener.ExitVar_stmt(this);
+			if (typedListener != null) typedListener.ExitVar_stmt_base(this);
 		}
 		public override TResult Accept<TResult>(IParseTreeVisitor<TResult> visitor) {
 			IBRAQParserVisitor<TResult> typedVisitor = visitor as IBRAQParserVisitor<TResult>;
-			if (typedVisitor != null) return typedVisitor.VisitVar_stmt(this);
+			if (typedVisitor != null) return typedVisitor.VisitVar_stmt_base(this);
 			else return visitor.VisitChildren(this);
 		}
 	}
 
 	[RuleVersion(0)]
-	public Var_stmtContext var_stmt() {
-		Var_stmtContext _localctx = new Var_stmtContext(Context, State);
-		EnterRule(_localctx, 6, RULE_var_stmt);
+	public Var_stmt_baseContext var_stmt_base() {
+		Var_stmt_baseContext _localctx = new Var_stmt_baseContext(Context, State);
+		EnterRule(_localctx, 4, RULE_var_stmt_base);
 		int _la;
 		try {
 			EnterOuterAlt(_localctx, 1);
 			{
-			State = 46; Match(VAR);
-			State = 47; _localctx.varname = Match(ID);
-			State = 50;
+			State = 33; Match(VAR);
+			State = 34; _localctx.id_name = Match(ID);
+			State = 37;
 			ErrorHandler.Sync(this);
 			_la = TokenStream.LA(1);
 			if (_la==EQUALS) {
 				{
-				State = 48; Match(EQUALS);
-				State = 49; _localctx.assignee = expr(0);
+				State = 35; Match(EQUALS);
+				State = 36; _localctx.assignee = expr(0);
 				}
 			}
 
@@ -391,39 +291,92 @@ public partial class BRAQParser : Parser {
 		return _localctx;
 	}
 
-	public partial class Expr_stmtContext : ParserRuleContext {
-		public ExprContext expr_;
+	public partial class Print_stmt_baseContext : ParserRuleContext {
+		public ExprContext arg;
+		public ITerminalNode PRINT() { return GetToken(BRAQParser.PRINT, 0); }
 		public ExprContext expr() {
 			return GetRuleContext<ExprContext>(0);
 		}
-		public Expr_stmtContext(ParserRuleContext parent, int invokingState)
+		public Print_stmt_baseContext(ParserRuleContext parent, int invokingState)
 			: base(parent, invokingState)
 		{
 		}
-		public override int RuleIndex { get { return RULE_expr_stmt; } }
+		public override int RuleIndex { get { return RULE_print_stmt_base; } }
 		public override void EnterRule(IParseTreeListener listener) {
 			IBRAQParserListener typedListener = listener as IBRAQParserListener;
-			if (typedListener != null) typedListener.EnterExpr_stmt(this);
+			if (typedListener != null) typedListener.EnterPrint_stmt_base(this);
 		}
 		public override void ExitRule(IParseTreeListener listener) {
 			IBRAQParserListener typedListener = listener as IBRAQParserListener;
-			if (typedListener != null) typedListener.ExitExpr_stmt(this);
+			if (typedListener != null) typedListener.ExitPrint_stmt_base(this);
 		}
 		public override TResult Accept<TResult>(IParseTreeVisitor<TResult> visitor) {
 			IBRAQParserVisitor<TResult> typedVisitor = visitor as IBRAQParserVisitor<TResult>;
-			if (typedVisitor != null) return typedVisitor.VisitExpr_stmt(this);
+			if (typedVisitor != null) return typedVisitor.VisitPrint_stmt_base(this);
 			else return visitor.VisitChildren(this);
 		}
 	}
 
 	[RuleVersion(0)]
-	public Expr_stmtContext expr_stmt() {
-		Expr_stmtContext _localctx = new Expr_stmtContext(Context, State);
-		EnterRule(_localctx, 8, RULE_expr_stmt);
+	public Print_stmt_baseContext print_stmt_base() {
+		Print_stmt_baseContext _localctx = new Print_stmt_baseContext(Context, State);
+		EnterRule(_localctx, 6, RULE_print_stmt_base);
 		try {
 			EnterOuterAlt(_localctx, 1);
 			{
-			State = 52; _localctx.expr_ = expr(0);
+			State = 39; Match(PRINT);
+			State = 40; _localctx.arg = expr(0);
+			}
+		}
+		catch (RecognitionException re) {
+			_localctx.exception = re;
+			ErrorHandler.ReportError(this, re);
+			ErrorHandler.Recover(this, re);
+		}
+		finally {
+			ExitRule();
+		}
+		return _localctx;
+	}
+
+	public partial class Assign_stmt_baseContext : ParserRuleContext {
+		public IToken id_name;
+		public ExprContext assignee;
+		public ITerminalNode EQUALS() { return GetToken(BRAQParser.EQUALS, 0); }
+		public ITerminalNode ID() { return GetToken(BRAQParser.ID, 0); }
+		public ExprContext expr() {
+			return GetRuleContext<ExprContext>(0);
+		}
+		public Assign_stmt_baseContext(ParserRuleContext parent, int invokingState)
+			: base(parent, invokingState)
+		{
+		}
+		public override int RuleIndex { get { return RULE_assign_stmt_base; } }
+		public override void EnterRule(IParseTreeListener listener) {
+			IBRAQParserListener typedListener = listener as IBRAQParserListener;
+			if (typedListener != null) typedListener.EnterAssign_stmt_base(this);
+		}
+		public override void ExitRule(IParseTreeListener listener) {
+			IBRAQParserListener typedListener = listener as IBRAQParserListener;
+			if (typedListener != null) typedListener.ExitAssign_stmt_base(this);
+		}
+		public override TResult Accept<TResult>(IParseTreeVisitor<TResult> visitor) {
+			IBRAQParserVisitor<TResult> typedVisitor = visitor as IBRAQParserVisitor<TResult>;
+			if (typedVisitor != null) return typedVisitor.VisitAssign_stmt_base(this);
+			else return visitor.VisitChildren(this);
+		}
+	}
+
+	[RuleVersion(0)]
+	public Assign_stmt_baseContext assign_stmt_base() {
+		Assign_stmt_baseContext _localctx = new Assign_stmt_baseContext(Context, State);
+		EnterRule(_localctx, 8, RULE_assign_stmt_base);
+		try {
+			EnterOuterAlt(_localctx, 1);
+			{
+			State = 42; _localctx.id_name = Match(ID);
+			State = 43; Match(EQUALS);
+			State = 44; _localctx.assignee = expr(0);
 			}
 		}
 		catch (RecognitionException re) {
@@ -440,10 +393,14 @@ public partial class BRAQParser : Parser {
 	public partial class ExprContext : ParserRuleContext {
 		public ExprContext left;
 		public GroupContext grouping;
+		public LiteralContext num;
 		public IToken op;
 		public ExprContext right;
 		public GroupContext group() {
 			return GetRuleContext<GroupContext>(0);
+		}
+		public LiteralContext literal() {
+			return GetRuleContext<LiteralContext>(0);
 		}
 		public ExprContext[] expr() {
 			return GetRuleContexts<ExprContext>();
@@ -451,12 +408,11 @@ public partial class BRAQParser : Parser {
 		public ExprContext expr(int i) {
 			return GetRuleContext<ExprContext>(i);
 		}
-		public ITerminalNode DOUBLE_STAR() { return GetToken(BRAQParser.DOUBLE_STAR, 0); }
+		public ITerminalNode MODULUS() { return GetToken(BRAQParser.MODULUS, 0); }
 		public ITerminalNode STAR() { return GetToken(BRAQParser.STAR, 0); }
 		public ITerminalNode SLASH() { return GetToken(BRAQParser.SLASH, 0); }
 		public ITerminalNode PLUS() { return GetToken(BRAQParser.PLUS, 0); }
 		public ITerminalNode MINUS() { return GetToken(BRAQParser.MINUS, 0); }
-		public ITerminalNode OTHER_OP() { return GetToken(BRAQParser.OTHER_OP, 0); }
 		public ExprContext(ParserRuleContext parent, int invokingState)
 			: base(parent, invokingState)
 		{
@@ -493,31 +449,45 @@ public partial class BRAQParser : Parser {
 			int _alt;
 			EnterOuterAlt(_localctx, 1);
 			{
-			{
-			State = 55; _localctx.grouping = group();
+			State = 49;
+			ErrorHandler.Sync(this);
+			switch (TokenStream.LA(1)) {
+			case LBRACKET:
+				{
+				State = 47; _localctx.grouping = group();
+				}
+				break;
+			case NUMBER:
+			case ID:
+				{
+				State = 48; _localctx.num = literal();
+				}
+				break;
+			default:
+				throw new NoViableAltException(this);
 			}
 			Context.Stop = TokenStream.LT(-1);
-			State = 77;
+			State = 68;
 			ErrorHandler.Sync(this);
-			_alt = Interpreter.AdaptivePredict(TokenStream,7,Context);
+			_alt = Interpreter.AdaptivePredict(TokenStream,5,Context);
 			while ( _alt!=2 && _alt!=global::Antlr4.Runtime.Atn.ATN.INVALID_ALT_NUMBER ) {
 				if ( _alt==1 ) {
 					if ( ParseListeners!=null )
 						TriggerExitRuleEvent();
 					_prevctx = _localctx;
 					{
-					State = 75;
+					State = 66;
 					ErrorHandler.Sync(this);
-					switch ( Interpreter.AdaptivePredict(TokenStream,6,Context) ) {
+					switch ( Interpreter.AdaptivePredict(TokenStream,4,Context) ) {
 					case 1:
 						{
 						_localctx = new ExprContext(_parentctx, _parentState);
 						_localctx.left = _prevctx;
 						PushNewRecursionContext(_localctx, _startState, RULE_expr);
-						State = 57;
-						if (!(Precpred(Context, 6))) throw new FailedPredicateException(this, "Precpred(Context, 6)");
-						State = 58; _localctx.op = Match(DOUBLE_STAR);
-						State = 59; _localctx.right = expr(7);
+						State = 51;
+						if (!(Precpred(Context, 7))) throw new FailedPredicateException(this, "Precpred(Context, 7)");
+						State = 52; _localctx.op = Match(MODULUS);
+						State = 53; _localctx.right = expr(8);
 						}
 						break;
 					case 2:
@@ -525,10 +495,10 @@ public partial class BRAQParser : Parser {
 						_localctx = new ExprContext(_parentctx, _parentState);
 						_localctx.left = _prevctx;
 						PushNewRecursionContext(_localctx, _startState, RULE_expr);
-						State = 60;
-						if (!(Precpred(Context, 5))) throw new FailedPredicateException(this, "Precpred(Context, 5)");
-						State = 61; _localctx.op = Match(STAR);
-						State = 62; _localctx.right = expr(6);
+						State = 54;
+						if (!(Precpred(Context, 6))) throw new FailedPredicateException(this, "Precpred(Context, 6)");
+						State = 55; _localctx.op = Match(STAR);
+						State = 56; _localctx.right = expr(7);
 						}
 						break;
 					case 3:
@@ -536,10 +506,10 @@ public partial class BRAQParser : Parser {
 						_localctx = new ExprContext(_parentctx, _parentState);
 						_localctx.left = _prevctx;
 						PushNewRecursionContext(_localctx, _startState, RULE_expr);
-						State = 63;
-						if (!(Precpred(Context, 4))) throw new FailedPredicateException(this, "Precpred(Context, 4)");
-						State = 64; _localctx.op = Match(SLASH);
-						State = 65; _localctx.right = expr(5);
+						State = 57;
+						if (!(Precpred(Context, 5))) throw new FailedPredicateException(this, "Precpred(Context, 5)");
+						State = 58; _localctx.op = Match(SLASH);
+						State = 59; _localctx.right = expr(6);
 						}
 						break;
 					case 4:
@@ -547,10 +517,10 @@ public partial class BRAQParser : Parser {
 						_localctx = new ExprContext(_parentctx, _parentState);
 						_localctx.left = _prevctx;
 						PushNewRecursionContext(_localctx, _startState, RULE_expr);
-						State = 66;
-						if (!(Precpred(Context, 3))) throw new FailedPredicateException(this, "Precpred(Context, 3)");
-						State = 67; _localctx.op = Match(PLUS);
-						State = 68; _localctx.right = expr(4);
+						State = 60;
+						if (!(Precpred(Context, 4))) throw new FailedPredicateException(this, "Precpred(Context, 4)");
+						State = 61; _localctx.op = Match(PLUS);
+						State = 62; _localctx.right = expr(5);
 						}
 						break;
 					case 5:
@@ -558,29 +528,18 @@ public partial class BRAQParser : Parser {
 						_localctx = new ExprContext(_parentctx, _parentState);
 						_localctx.left = _prevctx;
 						PushNewRecursionContext(_localctx, _startState, RULE_expr);
-						State = 69;
-						if (!(Precpred(Context, 2))) throw new FailedPredicateException(this, "Precpred(Context, 2)");
-						State = 70; _localctx.op = Match(MINUS);
-						State = 71; _localctx.right = expr(3);
-						}
-						break;
-					case 6:
-						{
-						_localctx = new ExprContext(_parentctx, _parentState);
-						_localctx.left = _prevctx;
-						PushNewRecursionContext(_localctx, _startState, RULE_expr);
-						State = 72;
-						if (!(Precpred(Context, 1))) throw new FailedPredicateException(this, "Precpred(Context, 1)");
-						State = 73; _localctx.op = Match(OTHER_OP);
-						State = 74; _localctx.right = expr(2);
+						State = 63;
+						if (!(Precpred(Context, 3))) throw new FailedPredicateException(this, "Precpred(Context, 3)");
+						State = 64; _localctx.op = Match(MINUS);
+						State = 65; _localctx.right = expr(4);
 						}
 						break;
 					}
 					} 
 				}
-				State = 79;
+				State = 70;
 				ErrorHandler.Sync(this);
-				_alt = Interpreter.AdaptivePredict(TokenStream,7,Context);
+				_alt = Interpreter.AdaptivePredict(TokenStream,5,Context);
 			}
 			}
 		}
@@ -596,11 +555,7 @@ public partial class BRAQParser : Parser {
 	}
 
 	public partial class GroupContext : ParserRuleContext {
-		public LiteralContext single;
-		public ExprContext expression;
-		public LiteralContext literal() {
-			return GetRuleContext<LiteralContext>(0);
-		}
+		public ExprContext containing;
 		public ITerminalNode LBRACKET() { return GetToken(BRAQParser.LBRACKET, 0); }
 		public ITerminalNode RBRACKET() { return GetToken(BRAQParser.RBRACKET, 0); }
 		public ExprContext expr() {
@@ -631,28 +586,11 @@ public partial class BRAQParser : Parser {
 		GroupContext _localctx = new GroupContext(Context, State);
 		EnterRule(_localctx, 12, RULE_group);
 		try {
-			State = 85;
-			ErrorHandler.Sync(this);
-			switch (TokenStream.LA(1)) {
-			case NUMBER:
-			case FLOAT_NUMBER:
-			case ID:
-			case STRING:
-				EnterOuterAlt(_localctx, 1);
-				{
-				State = 80; _localctx.single = literal();
-				}
-				break;
-			case LBRACKET:
-				EnterOuterAlt(_localctx, 2);
-				{
-				State = 81; Match(LBRACKET);
-				State = 82; _localctx.expression = expr(0);
-				State = 83; Match(RBRACKET);
-				}
-				break;
-			default:
-				throw new NoViableAltException(this);
+			EnterOuterAlt(_localctx, 1);
+			{
+			State = 71; Match(LBRACKET);
+			State = 72; _localctx.containing = expr(0);
+			State = 73; Match(RBRACKET);
 			}
 		}
 		catch (RecognitionException re) {
@@ -667,10 +605,12 @@ public partial class BRAQParser : Parser {
 	}
 
 	public partial class LiteralContext : ParserRuleContext {
-		public ITerminalNode STRING() { return GetToken(BRAQParser.STRING, 0); }
+		public IToken num;
+		public Var_nodeContext var_node_;
 		public ITerminalNode NUMBER() { return GetToken(BRAQParser.NUMBER, 0); }
-		public ITerminalNode FLOAT_NUMBER() { return GetToken(BRAQParser.FLOAT_NUMBER, 0); }
-		public ITerminalNode ID() { return GetToken(BRAQParser.ID, 0); }
+		public Var_nodeContext var_node() {
+			return GetRuleContext<Var_nodeContext>(0);
+		}
 		public LiteralContext(ParserRuleContext parent, int invokingState)
 			: base(parent, invokingState)
 		{
@@ -695,19 +635,68 @@ public partial class BRAQParser : Parser {
 	public LiteralContext literal() {
 		LiteralContext _localctx = new LiteralContext(Context, State);
 		EnterRule(_localctx, 14, RULE_literal);
-		int _la;
+		try {
+			State = 77;
+			ErrorHandler.Sync(this);
+			switch (TokenStream.LA(1)) {
+			case NUMBER:
+				EnterOuterAlt(_localctx, 1);
+				{
+				State = 75; _localctx.num = Match(NUMBER);
+				}
+				break;
+			case ID:
+				EnterOuterAlt(_localctx, 2);
+				{
+				State = 76; _localctx.var_node_ = var_node();
+				}
+				break;
+			default:
+				throw new NoViableAltException(this);
+			}
+		}
+		catch (RecognitionException re) {
+			_localctx.exception = re;
+			ErrorHandler.ReportError(this, re);
+			ErrorHandler.Recover(this, re);
+		}
+		finally {
+			ExitRule();
+		}
+		return _localctx;
+	}
+
+	public partial class Var_nodeContext : ParserRuleContext {
+		public IToken id_name;
+		public ITerminalNode ID() { return GetToken(BRAQParser.ID, 0); }
+		public Var_nodeContext(ParserRuleContext parent, int invokingState)
+			: base(parent, invokingState)
+		{
+		}
+		public override int RuleIndex { get { return RULE_var_node; } }
+		public override void EnterRule(IParseTreeListener listener) {
+			IBRAQParserListener typedListener = listener as IBRAQParserListener;
+			if (typedListener != null) typedListener.EnterVar_node(this);
+		}
+		public override void ExitRule(IParseTreeListener listener) {
+			IBRAQParserListener typedListener = listener as IBRAQParserListener;
+			if (typedListener != null) typedListener.ExitVar_node(this);
+		}
+		public override TResult Accept<TResult>(IParseTreeVisitor<TResult> visitor) {
+			IBRAQParserVisitor<TResult> typedVisitor = visitor as IBRAQParserVisitor<TResult>;
+			if (typedVisitor != null) return typedVisitor.VisitVar_node(this);
+			else return visitor.VisitChildren(this);
+		}
+	}
+
+	[RuleVersion(0)]
+	public Var_nodeContext var_node() {
+		Var_nodeContext _localctx = new Var_nodeContext(Context, State);
+		EnterRule(_localctx, 16, RULE_var_node);
 		try {
 			EnterOuterAlt(_localctx, 1);
 			{
-			State = 87;
-			_la = TokenStream.LA(1);
-			if ( !((((_la) & ~0x3f) == 0 && ((1L << _la) & ((1L << NUMBER) | (1L << FLOAT_NUMBER) | (1L << ID) | (1L << STRING))) != 0)) ) {
-			ErrorHandler.RecoverInline(this);
-			}
-			else {
-				ErrorHandler.ReportMatch(this);
-			    Consume();
-			}
+			State = 79; _localctx.id_name = Match(ID);
 			}
 		}
 		catch (RecognitionException re) {
@@ -729,91 +718,82 @@ public partial class BRAQParser : Parser {
 	}
 	private bool expr_sempred(ExprContext _localctx, int predIndex) {
 		switch (predIndex) {
-		case 0: return Precpred(Context, 6);
-		case 1: return Precpred(Context, 5);
-		case 2: return Precpred(Context, 4);
-		case 3: return Precpred(Context, 3);
-		case 4: return Precpred(Context, 2);
-		case 5: return Precpred(Context, 1);
+		case 0: return Precpred(Context, 7);
+		case 1: return Precpred(Context, 6);
+		case 2: return Precpred(Context, 5);
+		case 3: return Precpred(Context, 4);
+		case 4: return Precpred(Context, 3);
 		}
 		return true;
 	}
 
 	private static char[] _serializedATN = {
 		'\x3', '\x608B', '\xA72A', '\x8133', '\xB9ED', '\x417C', '\x3BE7', '\x7786', 
-		'\x5964', '\x3', '\x1B', '\\', '\x4', '\x2', '\t', '\x2', '\x4', '\x3', 
+		'\x5964', '\x3', '\x11', 'T', '\x4', '\x2', '\t', '\x2', '\x4', '\x3', 
 		'\t', '\x3', '\x4', '\x4', '\t', '\x4', '\x4', '\x5', '\t', '\x5', '\x4', 
 		'\x6', '\t', '\x6', '\x4', '\a', '\t', '\a', '\x4', '\b', '\t', '\b', 
-		'\x4', '\t', '\t', '\t', '\x3', '\x2', '\x3', '\x2', '\a', '\x2', '\x15', 
-		'\n', '\x2', '\f', '\x2', '\xE', '\x2', '\x18', '\v', '\x2', '\x3', '\x2', 
-		'\x3', '\x2', '\x3', '\x3', '\x3', '\x3', '\a', '\x3', '\x1E', '\n', '\x3', 
-		'\f', '\x3', '\xE', '\x3', '!', '\v', '\x3', '\x3', '\x3', '\a', '\x3', 
-		'$', '\n', '\x3', '\f', '\x3', '\xE', '\x3', '\'', '\v', '\x3', '\x3', 
-		'\x3', '\x3', '\x3', '\x3', '\x4', '\x3', '\x4', '\x5', '\x4', '-', '\n', 
-		'\x4', '\x3', '\x4', '\x3', '\x4', '\x3', '\x5', '\x3', '\x5', '\x3', 
-		'\x5', '\x3', '\x5', '\x5', '\x5', '\x35', '\n', '\x5', '\x3', '\x6', 
-		'\x3', '\x6', '\x3', '\a', '\x3', '\a', '\x3', '\a', '\x3', '\a', '\x3', 
+		'\x4', '\t', '\t', '\t', '\x4', '\n', '\t', '\n', '\x3', '\x2', '\a', 
+		'\x2', '\x16', '\n', '\x2', '\f', '\x2', '\xE', '\x2', '\x19', '\v', '\x2', 
+		'\x3', '\x2', '\x3', '\x2', '\x3', '\x3', '\x3', '\x3', '\x3', '\x3', 
+		'\x5', '\x3', ' ', '\n', '\x3', '\x3', '\x3', '\x3', '\x3', '\x3', '\x4', 
+		'\x3', '\x4', '\x3', '\x4', '\x3', '\x4', '\x5', '\x4', '(', '\n', '\x4', 
+		'\x3', '\x5', '\x3', '\x5', '\x3', '\x5', '\x3', '\x6', '\x3', '\x6', 
+		'\x3', '\x6', '\x3', '\x6', '\x3', '\a', '\x3', '\a', '\x3', '\a', '\x5', 
+		'\a', '\x34', '\n', '\a', '\x3', '\a', '\x3', '\a', '\x3', '\a', '\x3', 
 		'\a', '\x3', '\a', '\x3', '\a', '\x3', '\a', '\x3', '\a', '\x3', '\a', 
 		'\x3', '\a', '\x3', '\a', '\x3', '\a', '\x3', '\a', '\x3', '\a', '\x3', 
-		'\a', '\x3', '\a', '\x3', '\a', '\x3', '\a', '\x3', '\a', '\x3', '\a', 
-		'\a', '\a', 'N', '\n', '\a', '\f', '\a', '\xE', '\a', 'Q', '\v', '\a', 
-		'\x3', '\b', '\x3', '\b', '\x3', '\b', '\x3', '\b', '\x3', '\b', '\x5', 
-		'\b', 'X', '\n', '\b', '\x3', '\t', '\x3', '\t', '\x3', '\t', '\x2', '\x3', 
-		'\f', '\n', '\x2', '\x4', '\x6', '\b', '\n', '\f', '\xE', '\x10', '\x2', 
-		'\x3', '\x4', '\x2', '\x15', '\x17', '\x19', '\x19', '\x2', '`', '\x2', 
-		'\x16', '\x3', '\x2', '\x2', '\x2', '\x4', '\x1B', '\x3', '\x2', '\x2', 
-		'\x2', '\x6', ',', '\x3', '\x2', '\x2', '\x2', '\b', '\x30', '\x3', '\x2', 
-		'\x2', '\x2', '\n', '\x36', '\x3', '\x2', '\x2', '\x2', '\f', '\x38', 
-		'\x3', '\x2', '\x2', '\x2', '\xE', 'W', '\x3', '\x2', '\x2', '\x2', '\x10', 
-		'Y', '\x3', '\x2', '\x2', '\x2', '\x12', '\x15', '\x5', '\x6', '\x4', 
-		'\x2', '\x13', '\x15', '\x5', '\x4', '\x3', '\x2', '\x14', '\x12', '\x3', 
-		'\x2', '\x2', '\x2', '\x14', '\x13', '\x3', '\x2', '\x2', '\x2', '\x15', 
-		'\x18', '\x3', '\x2', '\x2', '\x2', '\x16', '\x14', '\x3', '\x2', '\x2', 
-		'\x2', '\x16', '\x17', '\x3', '\x2', '\x2', '\x2', '\x17', '\x19', '\x3', 
-		'\x2', '\x2', '\x2', '\x18', '\x16', '\x3', '\x2', '\x2', '\x2', '\x19', 
-		'\x1A', '\a', '\x2', '\x2', '\x3', '\x1A', '\x3', '\x3', '\x2', '\x2', 
-		'\x2', '\x1B', '\x1F', '\a', '\n', '\x2', '\x2', '\x1C', '\x1E', '\a', 
-		'\x1B', '\x2', '\x2', '\x1D', '\x1C', '\x3', '\x2', '\x2', '\x2', '\x1E', 
-		'!', '\x3', '\x2', '\x2', '\x2', '\x1F', '\x1D', '\x3', '\x2', '\x2', 
-		'\x2', '\x1F', ' ', '\x3', '\x2', '\x2', '\x2', ' ', '%', '\x3', '\x2', 
-		'\x2', '\x2', '!', '\x1F', '\x3', '\x2', '\x2', '\x2', '\"', '$', '\x5', 
-		'\x6', '\x4', '\x2', '#', '\"', '\x3', '\x2', '\x2', '\x2', '$', '\'', 
-		'\x3', '\x2', '\x2', '\x2', '%', '#', '\x3', '\x2', '\x2', '\x2', '%', 
-		'&', '\x3', '\x2', '\x2', '\x2', '&', '(', '\x3', '\x2', '\x2', '\x2', 
-		'\'', '%', '\x3', '\x2', '\x2', '\x2', '(', ')', '\a', '\v', '\x2', '\x2', 
-		')', '\x5', '\x3', '\x2', '\x2', '\x2', '*', '-', '\x5', '\b', '\x5', 
-		'\x2', '+', '-', '\x5', '\n', '\x6', '\x2', ',', '*', '\x3', '\x2', '\x2', 
-		'\x2', ',', '+', '\x3', '\x2', '\x2', '\x2', '-', '.', '\x3', '\x2', '\x2', 
-		'\x2', '.', '/', '\a', '\f', '\x2', '\x2', '/', '\a', '\x3', '\x2', '\x2', 
-		'\x2', '\x30', '\x31', '\a', '\x13', '\x2', '\x2', '\x31', '\x34', '\a', 
-		'\x17', '\x2', '\x2', '\x32', '\x33', '\a', '\x5', '\x2', '\x2', '\x33', 
-		'\x35', '\x5', '\f', '\a', '\x2', '\x34', '\x32', '\x3', '\x2', '\x2', 
-		'\x2', '\x34', '\x35', '\x3', '\x2', '\x2', '\x2', '\x35', '\t', '\x3', 
-		'\x2', '\x2', '\x2', '\x36', '\x37', '\x5', '\f', '\a', '\x2', '\x37', 
-		'\v', '\x3', '\x2', '\x2', '\x2', '\x38', '\x39', '\b', '\a', '\x1', '\x2', 
-		'\x39', ':', '\x5', '\xE', '\b', '\x2', ':', 'O', '\x3', '\x2', '\x2', 
-		'\x2', ';', '<', '\f', '\b', '\x2', '\x2', '<', '=', '\a', '\r', '\x2', 
-		'\x2', '=', 'N', '\x5', '\f', '\a', '\t', '>', '?', '\f', '\a', '\x2', 
-		'\x2', '?', '@', '\a', '\x10', '\x2', '\x2', '@', 'N', '\x5', '\f', '\a', 
-		'\b', '\x41', '\x42', '\f', '\x6', '\x2', '\x2', '\x42', '\x43', '\a', 
-		'\x11', '\x2', '\x2', '\x43', 'N', '\x5', '\f', '\a', '\a', '\x44', '\x45', 
-		'\f', '\x5', '\x2', '\x2', '\x45', '\x46', '\a', '\xE', '\x2', '\x2', 
-		'\x46', 'N', '\x5', '\f', '\a', '\x6', 'G', 'H', '\f', '\x4', '\x2', '\x2', 
-		'H', 'I', '\a', '\xF', '\x2', '\x2', 'I', 'N', '\x5', '\f', '\a', '\x5', 
-		'J', 'K', '\f', '\x3', '\x2', '\x2', 'K', 'L', '\a', '\x18', '\x2', '\x2', 
-		'L', 'N', '\x5', '\f', '\a', '\x4', 'M', ';', '\x3', '\x2', '\x2', '\x2', 
-		'M', '>', '\x3', '\x2', '\x2', '\x2', 'M', '\x41', '\x3', '\x2', '\x2', 
-		'\x2', 'M', '\x44', '\x3', '\x2', '\x2', '\x2', 'M', 'G', '\x3', '\x2', 
-		'\x2', '\x2', 'M', 'J', '\x3', '\x2', '\x2', '\x2', 'N', 'Q', '\x3', '\x2', 
-		'\x2', '\x2', 'O', 'M', '\x3', '\x2', '\x2', '\x2', 'O', 'P', '\x3', '\x2', 
-		'\x2', '\x2', 'P', '\r', '\x3', '\x2', '\x2', '\x2', 'Q', 'O', '\x3', 
-		'\x2', '\x2', '\x2', 'R', 'X', '\x5', '\x10', '\t', '\x2', 'S', 'T', '\a', 
-		'\x6', '\x2', '\x2', 'T', 'U', '\x5', '\f', '\a', '\x2', 'U', 'V', '\a', 
-		'\a', '\x2', '\x2', 'V', 'X', '\x3', '\x2', '\x2', '\x2', 'W', 'R', '\x3', 
-		'\x2', '\x2', '\x2', 'W', 'S', '\x3', '\x2', '\x2', '\x2', 'X', '\xF', 
-		'\x3', '\x2', '\x2', '\x2', 'Y', 'Z', '\t', '\x2', '\x2', '\x2', 'Z', 
-		'\x11', '\x3', '\x2', '\x2', '\x2', '\v', '\x14', '\x16', '\x1F', '%', 
-		',', '\x34', 'M', 'O', 'W',
+		'\a', '\a', '\a', '\x45', '\n', '\a', '\f', '\a', '\xE', '\a', 'H', '\v', 
+		'\a', '\x3', '\b', '\x3', '\b', '\x3', '\b', '\x3', '\b', '\x3', '\t', 
+		'\x3', '\t', '\x5', '\t', 'P', '\n', '\t', '\x3', '\n', '\x3', '\n', '\x3', 
+		'\n', '\x2', '\x3', '\f', '\v', '\x2', '\x4', '\x6', '\b', '\n', '\f', 
+		'\xE', '\x10', '\x12', '\x2', '\x2', '\x2', 'U', '\x2', '\x17', '\x3', 
+		'\x2', '\x2', '\x2', '\x4', '\x1F', '\x3', '\x2', '\x2', '\x2', '\x6', 
+		'#', '\x3', '\x2', '\x2', '\x2', '\b', ')', '\x3', '\x2', '\x2', '\x2', 
+		'\n', ',', '\x3', '\x2', '\x2', '\x2', '\f', '\x33', '\x3', '\x2', '\x2', 
+		'\x2', '\xE', 'I', '\x3', '\x2', '\x2', '\x2', '\x10', 'O', '\x3', '\x2', 
+		'\x2', '\x2', '\x12', 'Q', '\x3', '\x2', '\x2', '\x2', '\x14', '\x16', 
+		'\x5', '\x4', '\x3', '\x2', '\x15', '\x14', '\x3', '\x2', '\x2', '\x2', 
+		'\x16', '\x19', '\x3', '\x2', '\x2', '\x2', '\x17', '\x15', '\x3', '\x2', 
+		'\x2', '\x2', '\x17', '\x18', '\x3', '\x2', '\x2', '\x2', '\x18', '\x1A', 
+		'\x3', '\x2', '\x2', '\x2', '\x19', '\x17', '\x3', '\x2', '\x2', '\x2', 
+		'\x1A', '\x1B', '\a', '\x2', '\x2', '\x3', '\x1B', '\x3', '\x3', '\x2', 
+		'\x2', '\x2', '\x1C', ' ', '\x5', '\x6', '\x4', '\x2', '\x1D', ' ', '\x5', 
+		'\b', '\x5', '\x2', '\x1E', ' ', '\x5', '\n', '\x6', '\x2', '\x1F', '\x1C', 
+		'\x3', '\x2', '\x2', '\x2', '\x1F', '\x1D', '\x3', '\x2', '\x2', '\x2', 
+		'\x1F', '\x1E', '\x3', '\x2', '\x2', '\x2', ' ', '!', '\x3', '\x2', '\x2', 
+		'\x2', '!', '\"', '\a', '\f', '\x2', '\x2', '\"', '\x5', '\x3', '\x2', 
+		'\x2', '\x2', '#', '$', '\a', '\xF', '\x2', '\x2', '$', '\'', '\a', '\x11', 
+		'\x2', '\x2', '%', '&', '\a', '\x3', '\x2', '\x2', '&', '(', '\x5', '\f', 
+		'\a', '\x2', '\'', '%', '\x3', '\x2', '\x2', '\x2', '\'', '(', '\x3', 
+		'\x2', '\x2', '\x2', '(', '\a', '\x3', '\x2', '\x2', '\x2', ')', '*', 
+		'\a', '\x10', '\x2', '\x2', '*', '+', '\x5', '\f', '\a', '\x2', '+', '\t', 
+		'\x3', '\x2', '\x2', '\x2', ',', '-', '\a', '\x11', '\x2', '\x2', '-', 
+		'.', '\a', '\x3', '\x2', '\x2', '.', '/', '\x5', '\f', '\a', '\x2', '/', 
+		'\v', '\x3', '\x2', '\x2', '\x2', '\x30', '\x31', '\b', '\a', '\x1', '\x2', 
+		'\x31', '\x34', '\x5', '\xE', '\b', '\x2', '\x32', '\x34', '\x5', '\x10', 
+		'\t', '\x2', '\x33', '\x30', '\x3', '\x2', '\x2', '\x2', '\x33', '\x32', 
+		'\x3', '\x2', '\x2', '\x2', '\x34', '\x46', '\x3', '\x2', '\x2', '\x2', 
+		'\x35', '\x36', '\f', '\t', '\x2', '\x2', '\x36', '\x37', '\a', '\b', 
+		'\x2', '\x2', '\x37', '\x45', '\x5', '\f', '\a', '\n', '\x38', '\x39', 
+		'\f', '\b', '\x2', '\x2', '\x39', ':', '\a', '\x6', '\x2', '\x2', ':', 
+		'\x45', '\x5', '\f', '\a', '\t', ';', '<', '\f', '\a', '\x2', '\x2', '<', 
+		'=', '\a', '\a', '\x2', '\x2', '=', '\x45', '\x5', '\f', '\a', '\b', '>', 
+		'?', '\f', '\x6', '\x2', '\x2', '?', '@', '\a', '\x4', '\x2', '\x2', '@', 
+		'\x45', '\x5', '\f', '\a', '\a', '\x41', '\x42', '\f', '\x5', '\x2', '\x2', 
+		'\x42', '\x43', '\a', '\x5', '\x2', '\x2', '\x43', '\x45', '\x5', '\f', 
+		'\a', '\x6', '\x44', '\x35', '\x3', '\x2', '\x2', '\x2', '\x44', '\x38', 
+		'\x3', '\x2', '\x2', '\x2', '\x44', ';', '\x3', '\x2', '\x2', '\x2', '\x44', 
+		'>', '\x3', '\x2', '\x2', '\x2', '\x44', '\x41', '\x3', '\x2', '\x2', 
+		'\x2', '\x45', 'H', '\x3', '\x2', '\x2', '\x2', '\x46', '\x44', '\x3', 
+		'\x2', '\x2', '\x2', '\x46', 'G', '\x3', '\x2', '\x2', '\x2', 'G', '\r', 
+		'\x3', '\x2', '\x2', '\x2', 'H', '\x46', '\x3', '\x2', '\x2', '\x2', 'I', 
+		'J', '\a', '\n', '\x2', '\x2', 'J', 'K', '\x5', '\f', '\a', '\x2', 'K', 
+		'L', '\a', '\v', '\x2', '\x2', 'L', '\xF', '\x3', '\x2', '\x2', '\x2', 
+		'M', 'P', '\a', '\t', '\x2', '\x2', 'N', 'P', '\x5', '\x12', '\n', '\x2', 
+		'O', 'M', '\x3', '\x2', '\x2', '\x2', 'O', 'N', '\x3', '\x2', '\x2', '\x2', 
+		'P', '\x11', '\x3', '\x2', '\x2', '\x2', 'Q', 'R', '\a', '\x11', '\x2', 
+		'\x2', 'R', '\x13', '\x3', '\x2', '\x2', '\x2', '\t', '\x17', '\x1F', 
+		'\'', '\x33', '\x44', '\x46', 'O',
 	};
 
 	public static readonly ATN _ATN =
@@ -821,4 +801,3 @@ public partial class BRAQParser : Parser {
 
 
 }
-} // namespace BRAQ_grammar

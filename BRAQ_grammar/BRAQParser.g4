@@ -2,26 +2,27 @@
 
 options {tokenVocab = BRAQLexer; }
 
-program: (stmt|block)* EOF;
+program: (stmt*) EOF;
 
-block: LBRACE NEWLINE* (stmt)* RBRACE;
+stmt: (containing_var=var_stmt_base
+|containing_print=print_stmt_base
+|containing_assign=assign_stmt_base) SEMICOLON;
 
-stmt: (var_stmt|expr_stmt) SEMICOLON;
+var_stmt_base: VAR id_name=ID (EQUALS assignee=expr)?;
 
-var_stmt: VAR varname=ID (EQUALS assignee=expr)?;
+print_stmt_base: PRINT arg=expr;
 
-expr_stmt: expr_=expr;
+assign_stmt_base: id_name=ID EQUALS assignee=expr;
 
-expr: 
-grouping=group
-| left=expr op=DOUBLE_STAR right=expr
+expr: left=expr op=MODULUS right=expr
 | left=expr op=STAR right=expr
 | left=expr op=SLASH right=expr
 | left=expr op=PLUS right=expr
 | left=expr op=MINUS right=expr
-| left=expr op=OTHER_OP right=expr;
+| grouping=group
+| num=literal;
 
-group: single=literal| LBRACKET expression=expr RBRACKET;
+group: LBRACKET containing=expr RBRACKET;
+literal: num=NUMBER|var_node_=var_node;
 
-literal: STRING | NUMBER| FLOAT_NUMBER | ID;
-
+var_node: id_name=ID;

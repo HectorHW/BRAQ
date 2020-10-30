@@ -1,39 +1,24 @@
 ﻿lexer grammar BRAQLexer;
 
-
-COMMENT: '\\' .*? -> skip;
-
-SHORT_EQUALS: (DOUBLE_STAR|PLUS|MINUS|STAR|SLASH|OTHER_OP) EQUALS;
-
 EQUALS: '=';
 
-LBRACKET: '(';
-RBRACKET: ')';
-LSQBRACKET: '[';
-RSQBRACKET: ']';
-LBRACE: '{';
-RBRACE: '}';
-
-SEMICOLON: ';';
-
-DOUBLE_STAR: '**';
 PLUS: '+';
 MINUS: '-';
 STAR: '*';
 SLASH: '/';
-
-DEF: 'def';
-VAR: 'var';
-WHILE: 'while';
+MODULUS: '%';
 
 NUMBER: [0-9]+;
-FLOAT_NUMBER: [0-9] '.' [0-9]+;
 
-ID: [_a-zA-Z][_a-zA-Z0-9]*;
+LBRACKET : '(';
+RBRACKET : ')';
 
-OTHER_OP: [+\-=*\\|&@><^:]+;
+SEMICOLON: ';';
 
-STRING: '"' .*? '"';
+NEWLINE: ('\n'|'\r')+ -> skip;
+SPACE: [ \t]+ -> skip;
 
-WHITESPACE: (' '|'\t')+ -> skip;
-NEWLINE: ('\r'?'\n')+ -> skip;
+VAR: 'var';
+PRINT: 'print';
+
+ID: [A-Za-z_][A-Za-z0-9_]*;

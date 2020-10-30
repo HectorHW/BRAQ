@@ -19,7 +19,6 @@
 // Ambiguous reference in cref attribute
 #pragma warning disable 419
 
-namespace BRAQ_grammar {
 using Antlr4.Runtime.Misc;
 using Antlr4.Runtime.Tree;
 using IToken = Antlr4.Runtime.IToken;
@@ -39,29 +38,29 @@ public interface IBRAQParserVisitor<Result> : IParseTreeVisitor<Result> {
 	/// <return>The visitor result.</return>
 	Result VisitProgram([NotNull] BRAQParser.ProgramContext context);
 	/// <summary>
-	/// Visit a parse tree produced by <see cref="BRAQParser.block"/>.
-	/// </summary>
-	/// <param name="context">The parse tree.</param>
-	/// <return>The visitor result.</return>
-	Result VisitBlock([NotNull] BRAQParser.BlockContext context);
-	/// <summary>
 	/// Visit a parse tree produced by <see cref="BRAQParser.stmt"/>.
 	/// </summary>
 	/// <param name="context">The parse tree.</param>
 	/// <return>The visitor result.</return>
 	Result VisitStmt([NotNull] BRAQParser.StmtContext context);
 	/// <summary>
-	/// Visit a parse tree produced by <see cref="BRAQParser.var_stmt"/>.
+	/// Visit a parse tree produced by <see cref="BRAQParser.var_stmt_base"/>.
 	/// </summary>
 	/// <param name="context">The parse tree.</param>
 	/// <return>The visitor result.</return>
-	Result VisitVar_stmt([NotNull] BRAQParser.Var_stmtContext context);
+	Result VisitVar_stmt_base([NotNull] BRAQParser.Var_stmt_baseContext context);
 	/// <summary>
-	/// Visit a parse tree produced by <see cref="BRAQParser.expr_stmt"/>.
+	/// Visit a parse tree produced by <see cref="BRAQParser.print_stmt_base"/>.
 	/// </summary>
 	/// <param name="context">The parse tree.</param>
 	/// <return>The visitor result.</return>
-	Result VisitExpr_stmt([NotNull] BRAQParser.Expr_stmtContext context);
+	Result VisitPrint_stmt_base([NotNull] BRAQParser.Print_stmt_baseContext context);
+	/// <summary>
+	/// Visit a parse tree produced by <see cref="BRAQParser.assign_stmt_base"/>.
+	/// </summary>
+	/// <param name="context">The parse tree.</param>
+	/// <return>The visitor result.</return>
+	Result VisitAssign_stmt_base([NotNull] BRAQParser.Assign_stmt_baseContext context);
 	/// <summary>
 	/// Visit a parse tree produced by <see cref="BRAQParser.expr"/>.
 	/// </summary>
@@ -80,5 +79,10 @@ public interface IBRAQParserVisitor<Result> : IParseTreeVisitor<Result> {
 	/// <param name="context">The parse tree.</param>
 	/// <return>The visitor result.</return>
 	Result VisitLiteral([NotNull] BRAQParser.LiteralContext context);
+	/// <summary>
+	/// Visit a parse tree produced by <see cref="BRAQParser.var_node"/>.
+	/// </summary>
+	/// <param name="context">The parse tree.</param>
+	/// <return>The visitor result.</return>
+	Result VisitVar_node([NotNull] BRAQParser.Var_nodeContext context);
 }
-} // namespace BRAQ_grammar

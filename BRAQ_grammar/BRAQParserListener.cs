@@ -19,7 +19,6 @@
 // Ambiguous reference in cref attribute
 #pragma warning disable 419
 
-namespace BRAQ_grammar {
 using Antlr4.Runtime.Misc;
 using IParseTreeListener = Antlr4.Runtime.Tree.IParseTreeListener;
 using IToken = Antlr4.Runtime.IToken;
@@ -42,16 +41,6 @@ public interface IBRAQParserListener : IParseTreeListener {
 	/// <param name="context">The parse tree.</param>
 	void ExitProgram([NotNull] BRAQParser.ProgramContext context);
 	/// <summary>
-	/// Enter a parse tree produced by <see cref="BRAQParser.block"/>.
-	/// </summary>
-	/// <param name="context">The parse tree.</param>
-	void EnterBlock([NotNull] BRAQParser.BlockContext context);
-	/// <summary>
-	/// Exit a parse tree produced by <see cref="BRAQParser.block"/>.
-	/// </summary>
-	/// <param name="context">The parse tree.</param>
-	void ExitBlock([NotNull] BRAQParser.BlockContext context);
-	/// <summary>
 	/// Enter a parse tree produced by <see cref="BRAQParser.stmt"/>.
 	/// </summary>
 	/// <param name="context">The parse tree.</param>
@@ -62,25 +51,35 @@ public interface IBRAQParserListener : IParseTreeListener {
 	/// <param name="context">The parse tree.</param>
 	void ExitStmt([NotNull] BRAQParser.StmtContext context);
 	/// <summary>
-	/// Enter a parse tree produced by <see cref="BRAQParser.var_stmt"/>.
+	/// Enter a parse tree produced by <see cref="BRAQParser.var_stmt_base"/>.
 	/// </summary>
 	/// <param name="context">The parse tree.</param>
-	void EnterVar_stmt([NotNull] BRAQParser.Var_stmtContext context);
+	void EnterVar_stmt_base([NotNull] BRAQParser.Var_stmt_baseContext context);
 	/// <summary>
-	/// Exit a parse tree produced by <see cref="BRAQParser.var_stmt"/>.
+	/// Exit a parse tree produced by <see cref="BRAQParser.var_stmt_base"/>.
 	/// </summary>
 	/// <param name="context">The parse tree.</param>
-	void ExitVar_stmt([NotNull] BRAQParser.Var_stmtContext context);
+	void ExitVar_stmt_base([NotNull] BRAQParser.Var_stmt_baseContext context);
 	/// <summary>
-	/// Enter a parse tree produced by <see cref="BRAQParser.expr_stmt"/>.
+	/// Enter a parse tree produced by <see cref="BRAQParser.print_stmt_base"/>.
 	/// </summary>
 	/// <param name="context">The parse tree.</param>
-	void EnterExpr_stmt([NotNull] BRAQParser.Expr_stmtContext context);
+	void EnterPrint_stmt_base([NotNull] BRAQParser.Print_stmt_baseContext context);
 	/// <summary>
-	/// Exit a parse tree produced by <see cref="BRAQParser.expr_stmt"/>.
+	/// Exit a parse tree produced by <see cref="BRAQParser.print_stmt_base"/>.
 	/// </summary>
 	/// <param name="context">The parse tree.</param>
-	void ExitExpr_stmt([NotNull] BRAQParser.Expr_stmtContext context);
+	void ExitPrint_stmt_base([NotNull] BRAQParser.Print_stmt_baseContext context);
+	/// <summary>
+	/// Enter a parse tree produced by <see cref="BRAQParser.assign_stmt_base"/>.
+	/// </summary>
+	/// <param name="context">The parse tree.</param>
+	void EnterAssign_stmt_base([NotNull] BRAQParser.Assign_stmt_baseContext context);
+	/// <summary>
+	/// Exit a parse tree produced by <see cref="BRAQParser.assign_stmt_base"/>.
+	/// </summary>
+	/// <param name="context">The parse tree.</param>
+	void ExitAssign_stmt_base([NotNull] BRAQParser.Assign_stmt_baseContext context);
 	/// <summary>
 	/// Enter a parse tree produced by <see cref="BRAQParser.expr"/>.
 	/// </summary>
@@ -111,5 +110,14 @@ public interface IBRAQParserListener : IParseTreeListener {
 	/// </summary>
 	/// <param name="context">The parse tree.</param>
 	void ExitLiteral([NotNull] BRAQParser.LiteralContext context);
+	/// <summary>
+	/// Enter a parse tree produced by <see cref="BRAQParser.var_node"/>.
+	/// </summary>
+	/// <param name="context">The parse tree.</param>
+	void EnterVar_node([NotNull] BRAQParser.Var_nodeContext context);
+	/// <summary>
+	/// Exit a parse tree produced by <see cref="BRAQParser.var_node"/>.
+	/// </summary>
+	/// <param name="context">The parse tree.</param>
+	void ExitVar_node([NotNull] BRAQParser.Var_nodeContext context);
 }
-} // namespace BRAQ_grammar
