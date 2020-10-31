@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Reflection.Emit;
 using Antlr4.Runtime;
 using Antlr4.Runtime.Misc;
@@ -39,7 +40,20 @@ namespace BRAQ
             il.Emit(OpCodes.Ldloc, var_id);
             return 0;
         }
-        
+
+        public override int VisitRead_stmt_base(BRAQParser.Read_stmt_baseContext context)
+        {
+            //call read
+            il.EmitCall(OpCodes.Call, typeof(Console).GetMethod("ReadLine"), null);
+            
+            //call toInt
+            il.EmitCall(OpCodes.Call, typeof(int).GetMethod("Parse", new[]{typeof(string)}), null);
+            //save to var
+            dict.TryGetValue(context.arg.id_name, out var var_id);
+            il.Emit(OpCodes.Stloc, var_id);
+            return 0;
+        }
+
         public override int VisitExpr(BRAQParser.ExprContext context)
         {
             if (context.ChildCount == 1)

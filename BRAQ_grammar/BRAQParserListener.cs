@@ -81,6 +81,16 @@ public interface IBRAQParserListener : IParseTreeListener {
 	/// <param name="context">The parse tree.</param>
 	void ExitAssign_stmt_base([NotNull] BRAQParser.Assign_stmt_baseContext context);
 	/// <summary>
+	/// Enter a parse tree produced by <see cref="BRAQParser.read_stmt_base"/>.
+	/// </summary>
+	/// <param name="context">The parse tree.</param>
+	void EnterRead_stmt_base([NotNull] BRAQParser.Read_stmt_baseContext context);
+	/// <summary>
+	/// Exit a parse tree produced by <see cref="BRAQParser.read_stmt_base"/>.
+	/// </summary>
+	/// <param name="context">The parse tree.</param>
+	void ExitRead_stmt_base([NotNull] BRAQParser.Read_stmt_baseContext context);
+	/// <summary>
 	/// Enter a parse tree produced by <see cref="BRAQParser.expr"/>.
 	/// </summary>
 	/// <param name="context">The parse tree.</param>

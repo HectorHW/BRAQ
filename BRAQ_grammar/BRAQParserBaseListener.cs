@@ -95,6 +95,18 @@ public partial class BRAQParserBaseListener : IBRAQParserListener {
 	/// <param name="context">The parse tree.</param>
 	public virtual void ExitAssign_stmt_base([NotNull] BRAQParser.Assign_stmt_baseContext context) { }
 	/// <summary>
+	/// Enter a parse tree produced by <see cref="BRAQParser.read_stmt_base"/>.
+	/// <para>The default implementation does nothing.</para>
+	/// </summary>
+	/// <param name="context">The parse tree.</param>
+	public virtual void EnterRead_stmt_base([NotNull] BRAQParser.Read_stmt_baseContext context) { }
+	/// <summary>
+	/// Exit a parse tree produced by <see cref="BRAQParser.read_stmt_base"/>.
+	/// <para>The default implementation does nothing.</para>
+	/// </summary>
+	/// <param name="context">The parse tree.</param>
+	public virtual void ExitRead_stmt_base([NotNull] BRAQParser.Read_stmt_baseContext context) { }
+	/// <summary>
 	/// Enter a parse tree produced by <see cref="BRAQParser.expr"/>.
 	/// <para>The default implementation does nothing.</para>
 	/// </summary>

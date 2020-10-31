@@ -12,7 +12,8 @@ NEWLINE=11
 SPACE=12
 VAR=13
 PRINT=14
-ID=15
+READ=15
+ID=16
 '='=1
 '+'=2
 '-'=3
@@ -24,3 +25,4 @@ ID=15
 ';'=10
 'var'=13
 'print'=14
+'read'=15

@@ -6,13 +6,16 @@ program: (stmt*) EOF;
 
 stmt: (containing_var=var_stmt_base
 |containing_print=print_stmt_base
-|containing_assign=assign_stmt_base) SEMICOLON;
+|containing_assign=assign_stmt_base
+|containing_read=read_stmt_base) SEMICOLON;
 
 var_stmt_base: VAR id_name=ID (EQUALS assignee=expr)?;
 
 print_stmt_base: PRINT arg=expr;
 
 assign_stmt_base: id_name=ID EQUALS assignee=expr;
+
+read_stmt_base: READ arg=var_node;
 
 expr: left=expr op=MODULUS right=expr
 | left=expr op=STAR right=expr

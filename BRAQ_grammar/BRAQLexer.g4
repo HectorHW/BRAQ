@@ -20,5 +20,6 @@ SPACE: [ \t]+ -> skip;
 
 VAR: 'var';
 PRINT: 'print';
+READ: 'read';
 
 ID: [A-Za-z_][A-Za-z0-9_]*;
