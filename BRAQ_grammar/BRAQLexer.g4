@@ -22,4 +22,6 @@ VAR: 'var';
 PRINT: 'print';
 READ: 'read';
 
+STRING: '"' .*? '"';
+
 ID: [A-Za-z_][A-Za-z0-9_]*;

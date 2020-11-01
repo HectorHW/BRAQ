@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Reflection.Emit;
 using Antlr4.Runtime;
+using Antlr4.Runtime.Dfa;
 using Antlr4.Runtime.Misc;
 
 namespace BRAQ
@@ -9,16 +10,22 @@ namespace BRAQ
     public class ILVisitor : BRAQParserBaseVisitor<int>
     {
         private ILGenerator il;
-        private Dictionary<IToken, int> dict;
-        private readonly ArrayList<string> _varList;
+        private Dictionary<IToken, BRAQParser.Var_stmt_baseContext> dict;
+        private readonly ArrayList<BRAQParser.Var_stmt_baseContext> _varList;
         
         private LocalBuilder for_print;
+        private Dictionary<ParserRuleContext, Type> type_dict;
 
-        public ILVisitor(ILGenerator il, Dictionary<IToken, int> dict, ArrayList<string> var_list)
+        public ILVisitor(ILGenerator il, 
+            Dictionary<IToken, BRAQParser.Var_stmt_baseContext> dict, 
+            ArrayList<BRAQParser.Var_stmt_baseContext> var_list, 
+            Dictionary<ParserRuleContext, Type> type_dict)
         {
             this.il = il;
             this.dict = dict;
             _varList = var_list;
+            this.type_dict = type_dict;
+            var t = typeof(int);
         }
 
         public override int VisitLiteral(BRAQParser.LiteralContext context)
@@ -26,6 +33,13 @@ namespace BRAQ
             if (context.num != null)
             {
                 il.Emit(OpCodes.Ldc_I4, int.Parse(context.num.Text));
+            }else if (context.str != null)
+            {
+                //строки хронятся вместе с кавычками, уберём их
+                string based = context.str.Text;
+                string unquoted = based.Substring(1, based.Length - 2);
+                
+                il.Emit(OpCodes.Ldstr, unquoted);
             }
             else
             {
@@ -36,7 +50,8 @@ namespace BRAQ
 
         public override int VisitVar_node(BRAQParser.Var_nodeContext context)
         {
-            dict.TryGetValue(context.id_name, out var var_id);
+            dict.TryGetValue(context.id_name, out var var_decl);
+            int var_id = _varList.IndexOf(var_decl);
             il.Emit(OpCodes.Ldloc, var_id);
             return 0;
         }
@@ -49,7 +64,8 @@ namespace BRAQ
             //call toInt
             il.EmitCall(OpCodes.Call, typeof(int).GetMethod("Parse", new[]{typeof(string)}), null);
             //save to var
-            dict.TryGetValue(context.arg.id_name, out var var_id);
+            dict.TryGetValue(context.arg.id_name, out var var_decl);
+            int var_id = _varList.IndexOf(var_decl);
             il.Emit(OpCodes.Stloc, var_id);
             return 0;
         }
@@ -96,18 +112,16 @@ namespace BRAQ
 
         public override int VisitAssign_stmt_base(BRAQParser.Assign_stmt_baseContext context)
         {
-            if (context.assignee != null)
-            {
-                context.assignee.Accept(this);
-            }
-            else
-            {
-                il.Emit(OpCodes.Ldc_I4_0);
-            }
+            
+            context.assignee.Accept(this);
+            
 
-            int var_index = _varList.IndexOf(context.id_name.Text);
+            var target_token = context.id_name;
+            
+            dict.TryGetValue(target_token, out var var_decl);
+            int var_id = _varList.IndexOf(var_decl);
 
-            il.Emit(OpCodes.Stloc, var_index);
+            il.Emit(OpCodes.Stloc, var_id);
             
             
             return 0;
@@ -117,9 +131,13 @@ namespace BRAQ
         {
             context.arg.Accept(this);
 
-            il.Emit(OpCodes.Stloc, for_print); // var_i = stack[0]
+            var T = type_dict[context.arg];
             
-            il.EmitWriteLine(for_print); // print(var_i)
+            il.EmitCall(OpCodes.Call, typeof(Console).GetMethod("WriteLine", new[]{T}), null);
+            
+            //il.Emit(OpCodes.Stloc, for_print); // var_i = stack[0]
+            
+            //il.EmitWriteLine(for_print); // print(var_i)
             
             return 0;
         }
@@ -129,16 +147,17 @@ namespace BRAQ
             if (context.assignee != null)
             {
                 context.assignee.Accept(this);
+                
+                var target_token = context.id_name;
+            
+                dict.TryGetValue(target_token, out var var_decl);
+                int var_id = _varList.IndexOf(var_decl);
+                if (var_id == -1) throw new Exception();
+                //Console.WriteLine(var_id);
+                //Console.WriteLine(_varList[0]);
+                il.Emit(OpCodes.Stloc, var_id);
             }
-            else
-            {
-                il.Emit(OpCodes.Ldc_I4_0);
-            }
-            
-            int var_index = _varList.IndexOf(context.id_name.Text);
-            
-            il.Emit(OpCodes.Stloc, var_index);
-            
+
             return 0;
         }
 
@@ -147,7 +166,9 @@ namespace BRAQ
             //define variables
             for (int i = 0; i < _varList.Count; i++)
             {
-                il.DeclareLocal(typeof(int));
+                //il.DeclareLocal(typeof(int));
+                var T = type_dict[_varList[i]];
+                il.DeclareLocal(T);
             }
             
             for_print = il.DeclareLocal(typeof(int));

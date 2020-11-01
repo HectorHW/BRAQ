@@ -26,6 +26,6 @@ expr: left=expr op=MODULUS right=expr
 | num=literal;
 
 group: LBRACKET containing=expr RBRACKET;
-literal: num=NUMBER|var_node_=var_node;
+literal: num=NUMBER|var_node_=var_node|str=STRING;
 
 var_node: id_name=ID;

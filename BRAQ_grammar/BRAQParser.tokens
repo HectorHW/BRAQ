@@ -13,7 +13,8 @@ SPACE=12
 VAR=13
 PRINT=14
 READ=15
-ID=16
+STRING=16
+ID=17
 '='=1
 '+'=2
 '-'=3
