@@ -75,11 +75,32 @@ namespace BRAQ
             this.assigners = assigners;
             varname_dict = new Dictionary<string, BRAQParser.Var_stmt_baseContext>();
 
-            TypeAllowances = File.ReadAllText("typing.txt").Split(new[] {'\n', '\r'}, StringSplitOptions.RemoveEmptyEntries)
+            TypeAllowances = File.ReadAllText("binary_typing.txt")
+                .Split(new[] {'\n', '\r'}, StringSplitOptions.RemoveEmptyEntries)
                 .Select(x => x.Split(new[] {' '}, StringSplitOptions.RemoveEmptyEntries))
-                .Select(x => 
+                .Select(x =>
                     new TypeHelper(Type.GetType(x[0]), Type.GetType(x[2]), x[1], Type.GetType(x[4]))
-                ).ToList();
+                ).ToList()
+                
+                .Concat<TypeHelper>(
+                    
+                    
+                    
+                    File.ReadAllText("unary_typing.txt")
+                        .Split(new[] {'\n', '\r'}, StringSplitOptions.RemoveEmptyEntries)
+                        .Select(x => x.Split(new[] {' '}, StringSplitOptions.RemoveEmptyEntries))
+                        .Select(x =>
+                            new TypeHelper(null, Type.GetType(x[0]), x[1], Type.GetType(x[3]))
+                        ).ToList()
+                    
+                    
+                    
+                    ).ToList();
+                
+                
+                
+                
+                ;
 
         }
 
@@ -151,6 +172,26 @@ namespace BRAQ
             {
                 context.call_exr.Accept(this);
                 dict[context] = dict[context.call_exr];
+            }
+            else if (context.unary_not_op != null)
+            {
+                context.right.Accept(this);
+                var right_type = dict[context.right];
+                try
+                {
+                    Console.WriteLine(context.unary_not_op.Text);
+                    Console.WriteLine(right_type);
+                    
+                    var type_pair = TypeAllowances
+                        .Find(x => 
+                            x.Equals(new TypeHelper(null, right_type, context.unary_not_op.Text, null)));
+                    dict[context] = type_pair.result;
+                    Console.WriteLine(type_pair.result);
+                }
+                catch(ArgumentNullException )
+                {
+                    throw new TypeMismatchError();
+                }
             }
             else
             {

@@ -86,10 +86,22 @@ namespace BRAQ
                 context.GetChild(0).Accept(this);
                 return 0;
             }
-            //two -> binary op
+            
+            if (context.unary_not_op != null)
+            {
+                context.right.Accept(this);
+                il.Emit(OpCodes.Ldc_I4_0);
+                il.Emit(OpCodes.Ceq);
 
+                return 0;
+            }
+            
+            
+            //two -> binary op
+            
             context.left.Accept(this);
-            context.right.Accept(this);
+            if (context.op.Text !="and" && context.op.Text !="or")
+                context.right.Accept(this);
 
             switch (context.op.Text)
             {
@@ -117,6 +129,90 @@ namespace BRAQ
                 case "%":
                     il.Emit(OpCodes.Rem);
                     break;
+                
+                case ">":
+                    il.Emit(OpCodes.Cgt);
+                    break;
+                case ">=": // a>=b  ~~~ !(a<b) ~~~ (a<b) == 0
+                    il.Emit(OpCodes.Clt);
+                    il.Emit(OpCodes.Ldc_I4_0);
+                    il.Emit(OpCodes.Ceq);
+                    break;
+                case "<":
+                    il.Emit(OpCodes.Clt);
+                    break;
+                case "<=":
+                    il.Emit(OpCodes.Cgt);
+                    il.Emit(OpCodes.Ldc_I4_0);
+                    il.Emit(OpCodes.Ceq);
+                    break;
+
+                case "?=":
+                    if (type_dict[context.left] == typeof(string))
+                    {
+                        il.EmitCall(OpCodes.Call, typeof(string).GetMethod("op_Equality",
+                            new[] {typeof(string), typeof(string)}) ?? throw new BindError(), null);
+                    }
+                    else
+                    {
+                        il.Emit(OpCodes.Ceq);
+                    }
+
+                    break;
+                case "!=":
+                    if (type_dict[context.left] == typeof(string))
+                    {
+                        il.EmitCall(OpCodes.Call, typeof(string).GetMethod("op_Inequality",
+                            new[] {typeof(string), typeof(string)}) ?? throw new BindError(), null);
+                    }
+                    else
+                    {
+                        il.Emit(OpCodes.Ceq);
+                        il.Emit(OpCodes.Ldc_I4_0);
+                        il.Emit(OpCodes.Ceq);
+                    }
+                    break;
+                
+                //Short-circuit
+                case "and":
+                    // если левый оператор ложный, тогда перепрыгиваем, иначе правый
+                    //il.Emit(OpCodes.Ldc_I4_0);
+                    Label falsey = il.DefineLabel(); //stack: left
+                    il.Emit(OpCodes.Brfalse_S, falsey); //stack: 
+                    context.right.Accept(this); //stack: right
+                    Label truthey = il.DefineLabel();
+                    il.Emit(OpCodes.Br_S, truthey); //stack: right
+                    
+                    il.MarkLabel(falsey); //from Brfalse, stack: 
+                    il.Emit(OpCodes.Ldc_I4_0); //stack: 0
+                    il.MarkLabel(truthey); //from br_s, stack: right
+                    break;
+                
+                case "or":
+                    //если левый истинный, тогда прыгаем, иначе правый
+                
+                    Label truthey_or = il.DefineLabel(); //stack: left
+                    il.Emit(OpCodes.Brtrue_S, truthey_or); //stack:
+                    Label falsey_or = il.DefineLabel();
+
+                    context.right.Accept(this); //stack: right
+                    il.Emit(OpCodes.Br_S, falsey_or); //stack: right
+                    
+                    il.MarkLabel(truthey_or); //from brtrue, stack: 
+                    il.Emit(OpCodes.Ldc_I4_1);// stack : 1
+                    
+                    il.MarkLabel(falsey_or); //from br_s, stack: right
+
+                    break;
+                
+                case "xor":
+                    //вычисляются оба оператора
+                    // a xor b ~~~ a !=b ~~~ (a==b)==0
+                    il.Emit(OpCodes.Ceq);
+                    il.Emit(OpCodes.Ldc_I4_0);
+                    il.Emit(OpCodes.Ceq);
+                    break;
+                    
             }
 
             return 0;

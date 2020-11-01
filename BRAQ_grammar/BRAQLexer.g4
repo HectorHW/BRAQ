@@ -10,6 +10,20 @@ MODULUS: '%';
 
 AT_OPERATOR: '@';
 
+GR: '>';
+GE: '>=';
+LS : '<';
+LE: '<=';
+
+EQ: '?=';
+NE : '!=';
+
+AND: 'and';
+OR: 'or';
+XOR: 'xor';
+
+NOT: 'not';
+
 NUMBER: [0-9]+;
 
 LBRACKET : '(';
