@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Reflection;
 using System.Reflection.Emit;
 using Antlr4.Runtime;
 using Antlr4.Runtime.Dfa;
@@ -16,16 +17,24 @@ namespace BRAQ
         private LocalBuilder for_print;
         private Dictionary<ParserRuleContext, Type> type_dict;
 
+        private Dictionary<IToken, MethodInfo> function_table;
+
         public ILVisitor(ILGenerator il, 
             Dictionary<IToken, BRAQParser.Var_stmt_baseContext> dict, 
             ArrayList<BRAQParser.Var_stmt_baseContext> var_list, 
-            Dictionary<ParserRuleContext, Type> type_dict)
+            Dictionary<ParserRuleContext, Type> type_dict,
+            Dictionary<IToken, MethodInfo> function_table)
         {
             this.il = il;
             this.dict = dict;
             _varList = var_list;
             this.type_dict = type_dict;
-            var t = typeof(int);
+            this.function_table = function_table;
+        }
+
+        public override int VisitArg_list(BRAQParser.Arg_listContext context)
+        {
+            return base.VisitArg_list(context);
         }
 
         public override int VisitLiteral(BRAQParser.LiteralContext context)
@@ -85,7 +94,16 @@ namespace BRAQ
             switch (context.op.Text)
             {
                 case "+":
-                    il.Emit(OpCodes.Add);
+                    if (type_dict[context.left] == typeof(string))
+                    {
+                        il.EmitCall(OpCodes.Call, typeof(string).GetMethod("Concat",
+                            new[] {typeof(string), typeof(string)}) ?? throw new BindError(), null);
+                    }
+                    else
+                    {
+                        il.Emit(OpCodes.Add);
+                    }
+                    
                     break;
                 case "-":
                     il.Emit(OpCodes.Sub);
@@ -107,6 +125,15 @@ namespace BRAQ
         public override int VisitGroup(BRAQParser.GroupContext context)
         {
             context.containing.Accept(this);
+            return 0;
+        }
+
+        public override int VisitCall(BRAQParser.CallContext context)
+        {
+            var function_ptr = function_table[context.calee];
+            context.arguments.Accept(this);
+
+            il.EmitCall(OpCodes.Call, function_ptr, null);
             return 0;
         }
 

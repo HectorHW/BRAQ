@@ -107,6 +107,18 @@ public partial class BRAQParserBaseListener : IBRAQParserListener {
 	/// <param name="context">The parse tree.</param>
 	public virtual void ExitRead_stmt_base([NotNull] BRAQParser.Read_stmt_baseContext context) { }
 	/// <summary>
+	/// Enter a parse tree produced by <see cref="BRAQParser.function_def_base"/>.
+	/// <para>The default implementation does nothing.</para>
+	/// </summary>
+	/// <param name="context">The parse tree.</param>
+	public virtual void EnterFunction_def_base([NotNull] BRAQParser.Function_def_baseContext context) { }
+	/// <summary>
+	/// Exit a parse tree produced by <see cref="BRAQParser.function_def_base"/>.
+	/// <para>The default implementation does nothing.</para>
+	/// </summary>
+	/// <param name="context">The parse tree.</param>
+	public virtual void ExitFunction_def_base([NotNull] BRAQParser.Function_def_baseContext context) { }
+	/// <summary>
 	/// Enter a parse tree produced by <see cref="BRAQParser.expr"/>.
 	/// <para>The default implementation does nothing.</para>
 	/// </summary>
@@ -130,6 +142,30 @@ public partial class BRAQParserBaseListener : IBRAQParserListener {
 	/// </summary>
 	/// <param name="context">The parse tree.</param>
 	public virtual void ExitGroup([NotNull] BRAQParser.GroupContext context) { }
+	/// <summary>
+	/// Enter a parse tree produced by <see cref="BRAQParser.call"/>.
+	/// <para>The default implementation does nothing.</para>
+	/// </summary>
+	/// <param name="context">The parse tree.</param>
+	public virtual void EnterCall([NotNull] BRAQParser.CallContext context) { }
+	/// <summary>
+	/// Exit a parse tree produced by <see cref="BRAQParser.call"/>.
+	/// <para>The default implementation does nothing.</para>
+	/// </summary>
+	/// <param name="context">The parse tree.</param>
+	public virtual void ExitCall([NotNull] BRAQParser.CallContext context) { }
+	/// <summary>
+	/// Enter a parse tree produced by <see cref="BRAQParser.arg_list"/>.
+	/// <para>The default implementation does nothing.</para>
+	/// </summary>
+	/// <param name="context">The parse tree.</param>
+	public virtual void EnterArg_list([NotNull] BRAQParser.Arg_listContext context) { }
+	/// <summary>
+	/// Exit a parse tree produced by <see cref="BRAQParser.arg_list"/>.
+	/// <para>The default implementation does nothing.</para>
+	/// </summary>
+	/// <param name="context">The parse tree.</param>
+	public virtual void ExitArg_list([NotNull] BRAQParser.Arg_listContext context) { }
 	/// <summary>
 	/// Enter a parse tree produced by <see cref="BRAQParser.literal"/>.
 	/// <para>The default implementation does nothing.</para>

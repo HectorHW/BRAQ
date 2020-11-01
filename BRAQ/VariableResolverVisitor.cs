@@ -55,6 +55,17 @@ namespace BRAQ
             return null;
         }
 
+        public override Pair<Dictionary<IToken, BRAQParser.Var_stmt_baseContext>, ArrayList<BRAQParser.Var_stmt_baseContext>> VisitCall(BRAQParser.CallContext context)
+        {
+            context.arguments.Accept(this);
+                return null;
+        }
+
+        public override Pair<Dictionary<IToken, BRAQParser.Var_stmt_baseContext>, ArrayList<BRAQParser.Var_stmt_baseContext>> VisitArg_list(BRAQParser.Arg_listContext context)
+        {
+            return base.VisitArg_list(context);
+        }
+
         public override Pair<Dictionary<IToken, BRAQParser.Var_stmt_baseContext>, ArrayList<BRAQParser.Var_stmt_baseContext>> 
             VisitVar_node(BRAQParser.Var_nodeContext context)
         {

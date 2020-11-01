@@ -53,16 +53,23 @@ namespace BRAQ
                 Console.WriteLine("{0} {1} {2} : {3}", t.Text, t.Line, t.Column, id);
             }
 
-            var type_dict = TyperVisitor.solveTypes(ast);
+            var solving = TyperVisitor.solveTypes(ast);
+
+            var type_dict = solving.a;
+            Dictionary<IToken, MethodInfo> function_table = solving.b;
             
+            /*
             foreach (var keyValuePair in type_dict)
             {
                 //if (keyValuePair.Key.GetType() == typeof(BRAQParser.Var_stmt_baseContext))
                 
                     Console.WriteLine(keyValuePair.Value);
                 
-            }
+            }*/
+            
+            
 
+            Console.WriteLine("solved types and functions");
 
             //compiling
             
@@ -74,30 +81,30 @@ namespace BRAQ
 
             ModuleBuilder module = asm.DefineDynamicModule(
                 prefixed_name, prefixed_name);
-        
+            
             TypeBuilder tpb = module.DefineType(
                 "Program", TypeAttributes.Class);
+            
             // the method that will hold our expression code
             MethodBuilder main = tpb.DefineMethod(
                 "Main", MethodAttributes.Public | MethodAttributes.Static);
 
             ILGenerator il = main.GetILGenerator();
 
-            ILVisitor visitor = new ILVisitor(il, mention_to_def, var_list, type_dict);
+            ILVisitor visitor = new ILVisitor(il, mention_to_def, var_list, type_dict, function_table);
 
             ast.Accept(visitor);
 
+            Console.WriteLine("generated code");
+            
             tpb.CreateType();
-            /*
-            object[] noArgs = new object[0]; // массив аргументов
 
-            asm.GetType("ExpressionExecutor")
-                .GetMethod("WriteValue")
-                .Invoke(null, noArgs);*/
 
             asm.SetEntryPoint(main);
         
             asm.Save(prefixed_name);
+
+            Console.WriteLine(Predefs.exp(1));
         }
     }
 }

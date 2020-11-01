@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Reflection;
 using Antlr4.Runtime;
 using Antlr4.Runtime.Misc;
 
@@ -28,7 +29,7 @@ namespace BRAQ
 
             public override bool Equals(object obj)
             {
-                if (obj.GetType() != this.GetType() )
+                if (obj.GetType() != GetType() )
                 {
                     return false;
                 }
@@ -43,6 +44,8 @@ namespace BRAQ
         
         private Dictionary<ParserRuleContext, Type> dict;
 
+        public Dictionary<IToken, MethodInfo> function_table = new Dictionary<IToken, MethodInfo>();
+
         private List<Pair<string, ParserRuleContext>> assigners;
         //private Dictionary<string, Type> varname_type_dict;
 
@@ -51,7 +54,7 @@ namespace BRAQ
         private Dictionary<string, BRAQParser.Var_stmt_baseContext> varname_dict;
         private List<TypeHelper> TypeAllowances;
 
-        public static Dictionary<ParserRuleContext, Type> solveTypes(BRAQParser.ProgramContext context)
+        public static Pair<Dictionary<ParserRuleContext, Type>, Dictionary<IToken, MethodInfo>> solveTypes(BRAQParser.ProgramContext context)
         {
             //check that there are no unassigned variables
             var assigners = AssignCheckVisitor.getAssigners(context);
@@ -60,7 +63,8 @@ namespace BRAQ
             //make types
             var visitor = new TyperVisitor(assigners);
             context.Accept(visitor);
-            return visitor.dict;
+            return new Pair<Dictionary<ParserRuleContext, Type>, Dictionary<IToken, MethodInfo>>
+                (visitor.dict, visitor.function_table);
         }
         
         
@@ -71,9 +75,11 @@ namespace BRAQ
             this.assigners = assigners;
             varname_dict = new Dictionary<string, BRAQParser.Var_stmt_baseContext>();
 
-            TypeAllowances = File.ReadAllText("typing.txt").Split(new[] {'\n'}, StringSplitOptions.RemoveEmptyEntries)
-                .Select(x => x.Split(new[] {' '}))
-                .Select(x => new TypeHelper(Type.GetType(x[0]), Type.GetType(x[2]), x[1], Type.GetType(x[4]))).ToList();
+            TypeAllowances = File.ReadAllText("typing.txt").Split(new[] {'\n', '\r'}, StringSplitOptions.RemoveEmptyEntries)
+                .Select(x => x.Split(new[] {' '}, StringSplitOptions.RemoveEmptyEntries))
+                .Select(x => 
+                    new TypeHelper(Type.GetType(x[0]), Type.GetType(x[2]), x[1], Type.GetType(x[4]))
+                ).ToList();
 
         }
 
@@ -126,7 +132,9 @@ namespace BRAQ
         public override Dictionary<ParserRuleContext, Type> VisitRead_stmt_base(BRAQParser.Read_stmt_baseContext context)
         {
             dict[context] = typeof(int);
-            return base.VisitRead_stmt_base(context);
+            
+            
+            return null;
         }
 
         public override Dictionary<ParserRuleContext, Type> VisitExpr(BRAQParser.ExprContext context)
@@ -139,6 +147,10 @@ namespace BRAQ
             {
                 context.num.Accept(this);
                 dict[context] = dict[context.num];
+            }else if (context.call_exr!=null)
+            {
+                context.call_exr.Accept(this);
+                dict[context] = dict[context.call_exr];
             }
             else
             {
@@ -146,14 +158,18 @@ namespace BRAQ
                 context.right.Accept(this);
                 var left_type = dict[context.left];
                 var right_type = dict[context.right];
-                Type resulting_type = null;
 
                 if (left_type != right_type) throw new TypeMismatchError();
                 try
                 {
+                    Console.WriteLine(left_type);
+                    Console.WriteLine(context.op.Text);
+                    Console.WriteLine(right_type);
                     var type_pair = TypeAllowances
-                        .Find(x => x.Equals(new TypeHelper(left_type, right_type, context.op.Text, null)));
+                        .Find(x => 
+                            x.Equals(new TypeHelper(left_type, right_type, context.op.Text, null)));
                     dict[context] = type_pair.result;
+                    Console.WriteLine(type_pair.result);
                 }
                 catch(ArgumentNullException )
                 {
@@ -169,6 +185,64 @@ namespace BRAQ
             context.containing.Accept(this);
             dict[context] = dict[context.containing];
             return base.VisitGroup(context);
+        }
+
+        public override Dictionary<ParserRuleContext, Type> VisitCall(BRAQParser.CallContext context)
+        {
+            //TODO
+            //get argument list
+            Type[] types;
+            if (context.arguments.single_argument != null)
+            {
+                context.arguments.single_argument.Accept(this);
+                types = new[] { dict[context.arguments.single_argument]};
+            }
+            else
+            {
+                foreach (var exprContext in context.arguments.expr())
+                {
+                    exprContext.Accept(this);
+                }
+
+                types = context.arguments.expr().Select(x => dict[x]).ToArray();
+            }
+
+            IToken function_token = context.calee;
+
+            //MethodInfo predef_function_info = typeof(Predefs).GetMethod(function_token.Text, types);
+            MethodInfo predef_function_info = Predefs.Resolve(function_token.Text, types);
+            
+            if (predef_function_info != null)
+            {
+                function_table[function_token] = predef_function_info;
+                dict[context] = predef_function_info.ReturnType;
+            }
+            else
+            {
+                Console.WriteLine(function_token.Text);
+                Console.WriteLine(String.Join(" ", types.ToList().Select(x => x.ToString())) );
+                throw new BindError();
+            }
+            
+            return null;
+        }
+
+        public override Dictionary<ParserRuleContext, Type> VisitArg_list(BRAQParser.Arg_listContext context)
+        {
+            //TODO
+            if (context.single_argument != null)
+            {
+                context.single_argument.Accept(this);
+                dict[context] = dict[context.single_argument];
+            }
+            else
+            {
+                foreach (var s in context.expr())
+                {
+                    s.Accept(this);
+                }
+            }
+            return null;
         }
 
         public override Dictionary<ParserRuleContext, Type> VisitLiteral(BRAQParser.LiteralContext context)
@@ -278,6 +352,10 @@ namespace BRAQ
     
 
     public class TypeMismatchError : Exception
+    {
+    }
+
+    public class BindError : Exception
     {
     }
 

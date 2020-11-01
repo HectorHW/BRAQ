@@ -1,4 +1,5 @@
-﻿var a = "abc";
-print a;
-a = "";
-print a;
+﻿var a;
+var b;
+read a;
+read b;
+print exp@sqr@double@(a+b);

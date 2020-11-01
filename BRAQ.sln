@@ -8,6 +8,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CalculatorGrammar", "Calcul
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Calculator Compiler", "Calculator Compiler\Calculator Compiler.csproj", "{5DCCAC25-D188-4FB6-BC69-018476B6452B}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BRAQStd", "BRAQStd\BRAQStd.csproj", "{8A16A7B6-A5E5-4D4D-BEDF-769154BEA525}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -30,5 +32,9 @@ Global
 		{5DCCAC25-D188-4FB6-BC69-018476B6452B}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{5DCCAC25-D188-4FB6-BC69-018476B6452B}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{5DCCAC25-D188-4FB6-BC69-018476B6452B}.Release|Any CPU.Build.0 = Release|Any CPU
+		{8A16A7B6-A5E5-4D4D-BEDF-769154BEA525}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{8A16A7B6-A5E5-4D4D-BEDF-769154BEA525}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{8A16A7B6-A5E5-4D4D-BEDF-769154BEA525}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{8A16A7B6-A5E5-4D4D-BEDF-769154BEA525}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 EndGlobal

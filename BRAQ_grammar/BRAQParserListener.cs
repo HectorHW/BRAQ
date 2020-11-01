@@ -91,6 +91,16 @@ public interface IBRAQParserListener : IParseTreeListener {
 	/// <param name="context">The parse tree.</param>
 	void ExitRead_stmt_base([NotNull] BRAQParser.Read_stmt_baseContext context);
 	/// <summary>
+	/// Enter a parse tree produced by <see cref="BRAQParser.function_def_base"/>.
+	/// </summary>
+	/// <param name="context">The parse tree.</param>
+	void EnterFunction_def_base([NotNull] BRAQParser.Function_def_baseContext context);
+	/// <summary>
+	/// Exit a parse tree produced by <see cref="BRAQParser.function_def_base"/>.
+	/// </summary>
+	/// <param name="context">The parse tree.</param>
+	void ExitFunction_def_base([NotNull] BRAQParser.Function_def_baseContext context);
+	/// <summary>
 	/// Enter a parse tree produced by <see cref="BRAQParser.expr"/>.
 	/// </summary>
 	/// <param name="context">The parse tree.</param>
@@ -110,6 +120,26 @@ public interface IBRAQParserListener : IParseTreeListener {
 	/// </summary>
 	/// <param name="context">The parse tree.</param>
 	void ExitGroup([NotNull] BRAQParser.GroupContext context);
+	/// <summary>
+	/// Enter a parse tree produced by <see cref="BRAQParser.call"/>.
+	/// </summary>
+	/// <param name="context">The parse tree.</param>
+	void EnterCall([NotNull] BRAQParser.CallContext context);
+	/// <summary>
+	/// Exit a parse tree produced by <see cref="BRAQParser.call"/>.
+	/// </summary>
+	/// <param name="context">The parse tree.</param>
+	void ExitCall([NotNull] BRAQParser.CallContext context);
+	/// <summary>
+	/// Enter a parse tree produced by <see cref="BRAQParser.arg_list"/>.
+	/// </summary>
+	/// <param name="context">The parse tree.</param>
+	void EnterArg_list([NotNull] BRAQParser.Arg_listContext context);
+	/// <summary>
+	/// Exit a parse tree produced by <see cref="BRAQParser.arg_list"/>.
+	/// </summary>
+	/// <param name="context">The parse tree.</param>
+	void ExitArg_list([NotNull] BRAQParser.Arg_listContext context);
 	/// <summary>
 	/// Enter a parse tree produced by <see cref="BRAQParser.literal"/>.
 	/// </summary>

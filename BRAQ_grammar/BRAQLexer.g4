@@ -8,6 +8,8 @@ STAR: '*';
 SLASH: '/';
 MODULUS: '%';
 
+AT_OPERATOR: '@';
+
 NUMBER: [0-9]+;
 
 LBRACKET : '(';
