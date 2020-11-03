@@ -29,6 +29,9 @@ NUMBER: [0-9]+;
 LBRACKET : '(';
 RBRACKET : ')';
 
+LCURLY: '{';
+RCURLY: '}';
+
 SEMICOLON: ';';
 
 NEWLINE: ('\n'|'\r')+ -> skip;
@@ -37,6 +40,9 @@ SPACE: [ \t]+ -> skip;
 VAR: 'var';
 PRINT: 'print';
 READ: 'read';
+
+IF: 'if';
+ELSE: 'else';
 
 STRING: '"' .*? '"';
 

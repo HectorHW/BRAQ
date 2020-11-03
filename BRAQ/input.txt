@@ -1,5 +1,8 @@
 ﻿var a;
-var b;
 read a;
-read b;
-print not (a?=b);
+
+if a {
+    print "greater";
+}else{
+    print "less or eq";
+}

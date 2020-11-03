@@ -4,10 +4,16 @@ options {tokenVocab = BRAQLexer; }
 
 program: (stmt*) EOF;
 
-stmt: (containing_var=var_stmt_base
+block: LCURLY containing=stmt* RCURLY;
+
+stmt: ((containing_var=var_stmt_base
 |containing_print=print_stmt_base
 |containing_assign=assign_stmt_base
-|containing_read=read_stmt_base) SEMICOLON;
+|containing_read=read_stmt_base) SEMICOLON)
+| containing_if=if_stmt;
+
+if_stmt: IF cond=expr then_branch=block (ELSE else_branch=block)?;
+
 // ID @ (params?) = expr
 var_stmt_base: VAR id_name=ID (EQUALS assignee=expr)?;
 
@@ -30,6 +36,8 @@ expr: num=literal
 | left=expr op=OR right=expr
 | left=expr op=XOR right=expr
 ;
+
+
 
 group: LBRACKET containing=expr RBRACKET;
 

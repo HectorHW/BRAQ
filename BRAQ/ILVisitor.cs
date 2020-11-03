@@ -36,6 +36,35 @@ namespace BRAQ
         {
             return base.VisitArg_list(context);
         }
+        
+        public override int VisitIf_stmt(BRAQParser.If_stmtContext context)
+        {
+            //evaluate condition
+            context.cond.Accept(this);
+            Label false_branch = il.DefineLabel();
+            Label after_blocks = il.DefineLabel();
+
+            il.Emit(OpCodes.Brfalse_S, false_branch);
+            
+            context.then_branch.Accept(this);
+
+            il.Emit(OpCodes.Br_S, after_blocks);
+
+            il.MarkLabel(false_branch);
+            
+            if (context.else_branch != null)
+            {
+                context.else_branch.Accept(this);
+            }
+            else
+            {
+                il.Emit(OpCodes.Nop);
+            }
+            il.MarkLabel(after_blocks);
+            
+            
+            return 0;
+        }
 
         public override int VisitLiteral(BRAQParser.LiteralContext context)
         {

@@ -47,6 +47,18 @@ public partial class BRAQParserBaseListener : IBRAQParserListener {
 	/// <param name="context">The parse tree.</param>
 	public virtual void ExitProgram([NotNull] BRAQParser.ProgramContext context) { }
 	/// <summary>
+	/// Enter a parse tree produced by <see cref="BRAQParser.block"/>.
+	/// <para>The default implementation does nothing.</para>
+	/// </summary>
+	/// <param name="context">The parse tree.</param>
+	public virtual void EnterBlock([NotNull] BRAQParser.BlockContext context) { }
+	/// <summary>
+	/// Exit a parse tree produced by <see cref="BRAQParser.block"/>.
+	/// <para>The default implementation does nothing.</para>
+	/// </summary>
+	/// <param name="context">The parse tree.</param>
+	public virtual void ExitBlock([NotNull] BRAQParser.BlockContext context) { }
+	/// <summary>
 	/// Enter a parse tree produced by <see cref="BRAQParser.stmt"/>.
 	/// <para>The default implementation does nothing.</para>
 	/// </summary>
@@ -58,6 +70,18 @@ public partial class BRAQParserBaseListener : IBRAQParserListener {
 	/// </summary>
 	/// <param name="context">The parse tree.</param>
 	public virtual void ExitStmt([NotNull] BRAQParser.StmtContext context) { }
+	/// <summary>
+	/// Enter a parse tree produced by <see cref="BRAQParser.if_stmt"/>.
+	/// <para>The default implementation does nothing.</para>
+	/// </summary>
+	/// <param name="context">The parse tree.</param>
+	public virtual void EnterIf_stmt([NotNull] BRAQParser.If_stmtContext context) { }
+	/// <summary>
+	/// Exit a parse tree produced by <see cref="BRAQParser.if_stmt"/>.
+	/// <para>The default implementation does nothing.</para>
+	/// </summary>
+	/// <param name="context">The parse tree.</param>
+	public virtual void ExitIf_stmt([NotNull] BRAQParser.If_stmtContext context) { }
 	/// <summary>
 	/// Enter a parse tree produced by <see cref="BRAQParser.var_stmt_base"/>.
 	/// <para>The default implementation does nothing.</para>

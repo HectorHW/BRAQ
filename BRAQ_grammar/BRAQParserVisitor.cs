@@ -38,11 +38,23 @@ public interface IBRAQParserVisitor<Result> : IParseTreeVisitor<Result> {
 	/// <return>The visitor result.</return>
 	Result VisitProgram([NotNull] BRAQParser.ProgramContext context);
 	/// <summary>
+	/// Visit a parse tree produced by <see cref="BRAQParser.block"/>.
+	/// </summary>
+	/// <param name="context">The parse tree.</param>
+	/// <return>The visitor result.</return>
+	Result VisitBlock([NotNull] BRAQParser.BlockContext context);
+	/// <summary>
 	/// Visit a parse tree produced by <see cref="BRAQParser.stmt"/>.
 	/// </summary>
 	/// <param name="context">The parse tree.</param>
 	/// <return>The visitor result.</return>
 	Result VisitStmt([NotNull] BRAQParser.StmtContext context);
+	/// <summary>
+	/// Visit a parse tree produced by <see cref="BRAQParser.if_stmt"/>.
+	/// </summary>
+	/// <param name="context">The parse tree.</param>
+	/// <return>The visitor result.</return>
+	Result VisitIf_stmt([NotNull] BRAQParser.If_stmtContext context);
 	/// <summary>
 	/// Visit a parse tree produced by <see cref="BRAQParser.var_stmt_base"/>.
 	/// </summary>

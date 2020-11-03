@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Reflection;
+using System.Runtime.Remoting.Contexts;
 using Antlr4.Runtime;
 using Antlr4.Runtime.Misc;
 
@@ -111,10 +112,34 @@ namespace BRAQ
             return dict;
         }
 
+        public override Dictionary<ParserRuleContext, Type> VisitBlock(BRAQParser.BlockContext context)
+        {
+            return base.VisitBlock(context);
+        }
+
         public override Dictionary<ParserRuleContext, Type> VisitStmt(BRAQParser.StmtContext context)
         {
             
             return base.VisitStmt(context);
+        }
+
+        public override Dictionary<ParserRuleContext, Type> VisitIf_stmt(BRAQParser.If_stmtContext context)
+        {
+            context.cond.Accept(this);
+            if (dict[context.cond]!=typeof(bool))
+            {
+                string msg =
+                    $"expected boolean type but got {dict[context.cond]} in if condition [Line {context.cond.Start.Line}]";
+                Console.WriteLine(msg);
+                
+                throw new TypeMismatchError(msg);
+                
+            }
+            
+            context.then_branch.Accept(this);
+            context.else_branch?.Accept(this);
+
+            return null;
         }
 
         public override Dictionary<ParserRuleContext, Type> VisitVar_stmt_base(BRAQParser.Var_stmt_baseContext context)
@@ -394,6 +419,17 @@ namespace BRAQ
 
     public class TypeMismatchError : Exception
     {
+        public string msg { get; set; }
+
+        public TypeMismatchError(string msg)
+        {
+            this.msg = msg;
+        }
+
+        public TypeMismatchError()
+        {
+            this.msg = "";
+        }
     }
 
     public class BindError : Exception
