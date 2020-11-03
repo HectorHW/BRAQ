@@ -170,7 +170,13 @@ namespace BRAQ
         {
             base.VisitAssign_stmt_base(context);
             context.assignee.Accept(this);
-            if (dict[varname_dict[context.id_name.Text]] != dict[context.assignee]) throw new TypeMismatchError();
+            if (dict[varname_dict[context.id_name.Text]] != dict[context.assignee])
+            {
+                string msg =
+                    $"assigning {dict[context.assignee]} to variable {context.id_name.Text} of type {dict[varname_dict[context.id_name.Text]]}";
+                Console.WriteLine(msg);
+                throw new TypeMismatchError();
+            }
             dict[context] = dict[context.assignee];
             return null;
         }
@@ -215,7 +221,9 @@ namespace BRAQ
                 }
                 catch(ArgumentNullException )
                 {
-                    throw new TypeMismatchError();
+                    string msg = $"Failed to find matching operator {context.unary_not_op.Text} for type {right_type} [Line {context.unary_not_op.Line}]";
+                    Console.WriteLine(msg);
+                    throw new TypeMismatchError(msg);
                 }
             }
             else
@@ -225,7 +233,12 @@ namespace BRAQ
                 var left_type = dict[context.left];
                 var right_type = dict[context.right];
 
-                if (left_type != right_type) throw new TypeMismatchError();
+                if (left_type != right_type)
+                {
+                    string msg = $"different left and right types: {left_type} {right_type} for operator {context.op.Text} [Line {context.op.Line}";
+                    Console.WriteLine(msg);
+                    throw new TypeMismatchError(msg);
+                }
                 try
                 {
                     Console.WriteLine(left_type);
@@ -239,7 +252,10 @@ namespace BRAQ
                 }
                 catch(ArgumentNullException )
                 {
-                    throw new TypeMismatchError();
+                    string msg =
+                        $"Failed to find operator {context.op.Text} for types {left_type} {right_type} [Line {context.op.Line}]";
+                    Console.WriteLine(msg);
+                    throw new TypeMismatchError(msg);
                 }
             }
             
@@ -363,7 +379,12 @@ namespace BRAQ
         public override int VisitProgram(BRAQParser.ProgramContext context)
         {
             base.VisitProgram(context);
-            if (assigned.ContainsValue(false)) throw new TypesolvingError(assigned);
+            if (assigned.ContainsValue(false))
+            {
+                string msg = $"variable {assigned.First(x => !x.Value).Key} was never assigned, cannot solve type.";
+                Console.WriteLine(msg);
+                throw new TypesolvingError(assigned);
+            }
             return 0;
         }
 
@@ -385,7 +406,12 @@ namespace BRAQ
         public override int VisitVar_node(BRAQParser.Var_nodeContext context)
         {
             string var_name = context.id_name.Text;
-            if (!assigned[var_name]) throw new TypesolvingError(assigned);
+            if (!assigned[var_name])
+            {
+                string msg = $"using unassigned variable {var_name}";
+                Console.WriteLine(msg);
+                throw new TypesolvingError(assigned);
+            }
             return base.VisitVar_node(context);
         }
 

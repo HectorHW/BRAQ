@@ -1,7 +1,7 @@
 ﻿var a;
 read a;
 
-if a {
+if a>0 {
     print "greater";
 }else{
     print "less or eq";
