@@ -274,28 +274,46 @@ namespace BRAQ
             //TODO
             //get argument list
             Type[] types;
-            if (context.arguments.single_argument != null)
+            if (context.single_argument != null)
             {
-                context.arguments.single_argument.Accept(this);
-                types = new[] { dict[context.arguments.single_argument]};
+                context.single_argument.Accept(this);
+                types = new[] { dict[context.single_argument]};
             }
             else
             {
-                foreach (var exprContext in context.arguments.expr())
+
+                
+                
+                foreach (var exprContext in context.multiple_arguments.expr())
                 {
                     exprContext.Accept(this);
                 }
 
-                types = context.arguments.expr().Select(x => dict[x]).ToArray();
+                types = context.multiple_arguments.expr().Select(x => dict[x]).ToArray();
             }
 
             IToken function_token = context.calee;
 
+            
+
             //MethodInfo predef_function_info = typeof(Predefs).GetMethod(function_token.Text, types);
-            MethodInfo predef_function_info = Predefs.Resolve(function_token.Text, types);
+            MethodInfo predef_function_info = PredefsHelper.Resolve(function_token.Text, types);
             
             if (predef_function_info != null)
             {
+
+                if (predef_function_info.GetParameters()
+                    .Zip(types, (r, w) => new KeyValuePair<Type, Type>(r.ParameterType, w))
+                    .Any(p => p.Key != p.Value))
+                {
+                    Console.WriteLine("could not bind {0}({1}) [Line {2}]", 
+                        function_token.Text, 
+                        String.Join(" ", types.Select(x => x.ToString())),
+                        function_token.Line
+                        );
+                    throw new BindError();
+                }
+                
                 function_table[function_token] = predef_function_info;
                 dict[context] = predef_function_info.ReturnType;
             }
@@ -309,23 +327,17 @@ namespace BRAQ
             return null;
         }
 
+        
         public override Dictionary<ParserRuleContext, Type> VisitArg_list(BRAQParser.Arg_listContext context)
         {
-            //TODO
-            if (context.single_argument != null)
+            foreach (var s in context.expr())
             {
-                context.single_argument.Accept(this);
-                dict[context] = dict[context.single_argument];
+                s.Accept(this);
             }
-            else
-            {
-                foreach (var s in context.expr())
-                {
-                    s.Accept(this);
-                }
-            }
+            
             return null;
         }
+        
 
         public override Dictionary<ParserRuleContext, Type> VisitLiteral(BRAQParser.LiteralContext context)
         {

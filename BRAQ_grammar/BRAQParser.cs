@@ -922,9 +922,15 @@ public partial class BRAQParser : Parser {
 
 	public partial class CallContext : ParserRuleContext {
 		public IToken calee;
-		public Arg_listContext arguments;
-		public ITerminalNode AT_OPERATOR() { return GetToken(BRAQParser.AT_OPERATOR, 0); }
+		public ExprContext single_argument;
+		public Arg_listContext multiple_arguments;
 		public ITerminalNode ID() { return GetToken(BRAQParser.ID, 0); }
+		public ITerminalNode AT_OPERATOR() { return GetToken(BRAQParser.AT_OPERATOR, 0); }
+		public ITerminalNode LBRACKET() { return GetToken(BRAQParser.LBRACKET, 0); }
+		public ITerminalNode RBRACKET() { return GetToken(BRAQParser.RBRACKET, 0); }
+		public ExprContext expr() {
+			return GetRuleContext<ExprContext>(0);
+		}
 		public Arg_listContext arg_list() {
 			return GetRuleContext<Arg_listContext>(0);
 		}
@@ -956,8 +962,25 @@ public partial class BRAQParser : Parser {
 			EnterOuterAlt(_localctx, 1);
 			{
 			State = 120; _localctx.calee = Match(ID);
-			State = 121; Match(AT_OPERATOR);
-			State = 122; _localctx.arguments = arg_list();
+			State = 127;
+			ErrorHandler.Sync(this);
+			switch (TokenStream.LA(1)) {
+			case AT_OPERATOR:
+				{
+				State = 121; Match(AT_OPERATOR);
+				State = 122; _localctx.single_argument = expr(0);
+				}
+				break;
+			case LBRACKET:
+				{
+				State = 123; Match(LBRACKET);
+				State = 124; _localctx.multiple_arguments = arg_list();
+				State = 125; Match(RBRACKET);
+				}
+				break;
+			default:
+				throw new NoViableAltException(this);
+			}
 			}
 		}
 		catch (RecognitionException re) {
@@ -972,13 +995,6 @@ public partial class BRAQParser : Parser {
 	}
 
 	public partial class Arg_listContext : ParserRuleContext {
-		public LiteralContext single_argument;
-		public ExprContext expressions;
-		public LiteralContext literal() {
-			return GetRuleContext<LiteralContext>(0);
-		}
-		public ITerminalNode LBRACKET() { return GetToken(BRAQParser.LBRACKET, 0); }
-		public ITerminalNode RBRACKET() { return GetToken(BRAQParser.RBRACKET, 0); }
 		public ExprContext[] expr() {
 			return GetRuleContexts<ExprContext>();
 		}
@@ -1011,41 +1027,21 @@ public partial class BRAQParser : Parser {
 		EnterRule(_localctx, 22, RULE_arg_list);
 		int _la;
 		try {
-			State = 133;
+			EnterOuterAlt(_localctx, 1);
+			{
+			State = 132;
 			ErrorHandler.Sync(this);
-			switch (TokenStream.LA(1)) {
-			case NUMBER:
-			case STRING:
-			case ID:
-				EnterOuterAlt(_localctx, 1);
+			_la = TokenStream.LA(1);
+			while ((((_la) & ~0x3f) == 0 && ((1L << _la) & ((1L << NOT) | (1L << NUMBER) | (1L << LBRACKET) | (1L << STRING) | (1L << ID))) != 0)) {
 				{
-				State = 124; _localctx.single_argument = literal();
+				{
+				State = 129; expr(0);
 				}
-				break;
-			case LBRACKET:
-				EnterOuterAlt(_localctx, 2);
-				{
-				State = 125; Match(LBRACKET);
-				{
-				State = 129;
+				}
+				State = 134;
 				ErrorHandler.Sync(this);
 				_la = TokenStream.LA(1);
-				while ((((_la) & ~0x3f) == 0 && ((1L << _la) & ((1L << NOT) | (1L << NUMBER) | (1L << LBRACKET) | (1L << STRING) | (1L << ID))) != 0)) {
-					{
-					{
-					State = 126; _localctx.expressions = expr(0);
-					}
-					}
-					State = 131;
-					ErrorHandler.Sync(this);
-					_la = TokenStream.LA(1);
-				}
-				}
-				State = 132; Match(RBRACKET);
-				}
-				break;
-			default:
-				throw new NoViableAltException(this);
+			}
 			}
 		}
 		catch (RecognitionException re) {
@@ -1218,9 +1214,9 @@ public partial class BRAQParser : Parser {
 		'\n', '\x3', '\n', '\x3', '\n', '\x3', '\n', '\x3', '\n', '\x3', '\n', 
 		'\x3', '\n', '\x3', '\n', '\a', '\n', 'r', '\n', '\n', '\f', '\n', '\xE', 
 		'\n', 'u', '\v', '\n', '\x3', '\v', '\x3', '\v', '\x3', '\v', '\x3', '\v', 
-		'\x3', '\f', '\x3', '\f', '\x3', '\f', '\x3', '\f', '\x3', '\r', '\x3', 
-		'\r', '\x3', '\r', '\a', '\r', '\x82', '\n', '\r', '\f', '\r', '\xE', 
-		'\r', '\x85', '\v', '\r', '\x3', '\r', '\x5', '\r', '\x88', '\n', '\r', 
+		'\x3', '\f', '\x3', '\f', '\x3', '\f', '\x3', '\f', '\x3', '\f', '\x3', 
+		'\f', '\x3', '\f', '\x5', '\f', '\x82', '\n', '\f', '\x3', '\r', '\a', 
+		'\r', '\x85', '\n', '\r', '\f', '\r', '\xE', '\r', '\x88', '\v', '\r', 
 		'\x3', '\xE', '\x3', '\xE', '\x3', '\xE', '\x5', '\xE', '\x8D', '\n', 
 		'\xE', '\x3', '\xF', '\x3', '\xF', '\x3', '\xF', '\x2', '\x3', '\x12', 
 		'\x10', '\x2', '\x4', '\x6', '\b', '\n', '\f', '\xE', '\x10', '\x12', 
@@ -1232,7 +1228,7 @@ public partial class BRAQParser : Parser {
 		'\x2', '\f', 'G', '\x3', '\x2', '\x2', '\x2', '\xE', 'J', '\x3', '\x2', 
 		'\x2', '\x2', '\x10', 'N', '\x3', '\x2', '\x2', '\x2', '\x12', 'W', '\x3', 
 		'\x2', '\x2', '\x2', '\x14', 'v', '\x3', '\x2', '\x2', '\x2', '\x16', 
-		'z', '\x3', '\x2', '\x2', '\x2', '\x18', '\x87', '\x3', '\x2', '\x2', 
+		'z', '\x3', '\x2', '\x2', '\x2', '\x18', '\x86', '\x3', '\x2', '\x2', 
 		'\x2', '\x1A', '\x8C', '\x3', '\x2', '\x2', '\x2', '\x1C', '\x8E', '\x3', 
 		'\x2', '\x2', '\x2', '\x1E', ' ', '\x5', '\x6', '\x4', '\x2', '\x1F', 
 		'\x1E', '\x3', '\x2', '\x2', '\x2', ' ', '#', '\x3', '\x2', '\x2', '\x2', 
@@ -1294,23 +1290,23 @@ public partial class BRAQParser : Parser {
 		'\x3', '\x2', '\x2', '\x2', 'u', 's', '\x3', '\x2', '\x2', '\x2', 'v', 
 		'w', '\a', '\x15', '\x2', '\x2', 'w', 'x', '\x5', '\x12', '\n', '\x2', 
 		'x', 'y', '\a', '\x16', '\x2', '\x2', 'y', '\x15', '\x3', '\x2', '\x2', 
-		'\x2', 'z', '{', '\a', '\"', '\x2', '\x2', '{', '|', '\a', '\t', '\x2', 
-		'\x2', '|', '}', '\x5', '\x18', '\r', '\x2', '}', '\x17', '\x3', '\x2', 
-		'\x2', '\x2', '~', '\x88', '\x5', '\x1A', '\xE', '\x2', '\x7F', '\x83', 
-		'\a', '\x15', '\x2', '\x2', '\x80', '\x82', '\x5', '\x12', '\n', '\x2', 
-		'\x81', '\x80', '\x3', '\x2', '\x2', '\x2', '\x82', '\x85', '\x3', '\x2', 
-		'\x2', '\x2', '\x83', '\x81', '\x3', '\x2', '\x2', '\x2', '\x83', '\x84', 
-		'\x3', '\x2', '\x2', '\x2', '\x84', '\x86', '\x3', '\x2', '\x2', '\x2', 
-		'\x85', '\x83', '\x3', '\x2', '\x2', '\x2', '\x86', '\x88', '\a', '\x16', 
-		'\x2', '\x2', '\x87', '~', '\x3', '\x2', '\x2', '\x2', '\x87', '\x7F', 
-		'\x3', '\x2', '\x2', '\x2', '\x88', '\x19', '\x3', '\x2', '\x2', '\x2', 
-		'\x89', '\x8D', '\a', '\x14', '\x2', '\x2', '\x8A', '\x8D', '\x5', '\x1C', 
-		'\xF', '\x2', '\x8B', '\x8D', '\a', '!', '\x2', '\x2', '\x8C', '\x89', 
-		'\x3', '\x2', '\x2', '\x2', '\x8C', '\x8A', '\x3', '\x2', '\x2', '\x2', 
-		'\x8C', '\x8B', '\x3', '\x2', '\x2', '\x2', '\x8D', '\x1B', '\x3', '\x2', 
-		'\x2', '\x2', '\x8E', '\x8F', '\a', '\"', '\x2', '\x2', '\x8F', '\x1D', 
-		'\x3', '\x2', '\x2', '\x2', '\xE', '!', '*', '\x33', '\x38', '?', '\x45', 
-		'W', 'q', 's', '\x83', '\x87', '\x8C',
+		'\x2', 'z', '\x81', '\a', '\"', '\x2', '\x2', '{', '|', '\a', '\t', '\x2', 
+		'\x2', '|', '\x82', '\x5', '\x12', '\n', '\x2', '}', '~', '\a', '\x15', 
+		'\x2', '\x2', '~', '\x7F', '\x5', '\x18', '\r', '\x2', '\x7F', '\x80', 
+		'\a', '\x16', '\x2', '\x2', '\x80', '\x82', '\x3', '\x2', '\x2', '\x2', 
+		'\x81', '{', '\x3', '\x2', '\x2', '\x2', '\x81', '}', '\x3', '\x2', '\x2', 
+		'\x2', '\x82', '\x17', '\x3', '\x2', '\x2', '\x2', '\x83', '\x85', '\x5', 
+		'\x12', '\n', '\x2', '\x84', '\x83', '\x3', '\x2', '\x2', '\x2', '\x85', 
+		'\x88', '\x3', '\x2', '\x2', '\x2', '\x86', '\x84', '\x3', '\x2', '\x2', 
+		'\x2', '\x86', '\x87', '\x3', '\x2', '\x2', '\x2', '\x87', '\x19', '\x3', 
+		'\x2', '\x2', '\x2', '\x88', '\x86', '\x3', '\x2', '\x2', '\x2', '\x89', 
+		'\x8D', '\a', '\x14', '\x2', '\x2', '\x8A', '\x8D', '\x5', '\x1C', '\xF', 
+		'\x2', '\x8B', '\x8D', '\a', '!', '\x2', '\x2', '\x8C', '\x89', '\x3', 
+		'\x2', '\x2', '\x2', '\x8C', '\x8A', '\x3', '\x2', '\x2', '\x2', '\x8C', 
+		'\x8B', '\x3', '\x2', '\x2', '\x2', '\x8D', '\x1B', '\x3', '\x2', '\x2', 
+		'\x2', '\x8E', '\x8F', '\a', '\"', '\x2', '\x2', '\x8F', '\x1D', '\x3', 
+		'\x2', '\x2', '\x2', '\xE', '!', '*', '\x33', '\x38', '?', '\x45', 'W', 
+		'q', 's', '\x81', '\x86', '\x8C',
 	};
 
 	public static readonly ATN _ATN =

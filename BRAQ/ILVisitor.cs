@@ -32,11 +32,6 @@ namespace BRAQ
             this.function_table = function_table;
         }
 
-        public override int VisitArg_list(BRAQParser.Arg_listContext context)
-        {
-            return base.VisitArg_list(context);
-        }
-        
         public override int VisitIf_stmt(BRAQParser.If_stmtContext context)
         {
             //evaluate condition
@@ -256,7 +251,14 @@ namespace BRAQ
         public override int VisitCall(BRAQParser.CallContext context)
         {
             var function_ptr = function_table[context.calee];
-            context.arguments.Accept(this);
+            if(context.single_argument!=null) context.single_argument.Accept(this);
+            else
+            {
+                foreach (var exprContext in context.multiple_arguments.expr())
+                {
+                    exprContext.Accept(this);
+                }
+            }
 
             il.EmitCall(OpCodes.Call, function_ptr, null);
             return 0;

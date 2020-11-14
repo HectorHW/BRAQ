@@ -41,8 +41,9 @@ expr: num=literal
 
 group: LBRACKET containing=expr RBRACKET;
 
-call: calee=ID AT_OPERATOR arguments=arg_list;
-arg_list: single_argument=literal | LBRACKET (expressions=expr*) RBRACKET;
+//call: calee=ID AT_OPERATOR arguments=arg_list;
+call: calee=ID (AT_OPERATOR single_argument=expr | LBRACKET multiple_arguments=arg_list RBRACKET);
+arg_list: expr* ;
 
 literal: num=NUMBER|var_node_=var_node|str=STRING;
 

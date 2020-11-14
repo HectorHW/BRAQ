@@ -57,8 +57,8 @@ namespace BRAQ
 
         public override Pair<Dictionary<IToken, BRAQParser.Var_stmt_baseContext>, ArrayList<BRAQParser.Var_stmt_baseContext>> VisitCall(BRAQParser.CallContext context)
         {
-            context.arguments.Accept(this);
-                return null;
+            
+                return base.VisitCall(context);
         }
 
         public override Pair<Dictionary<IToken, BRAQParser.Var_stmt_baseContext>, ArrayList<BRAQParser.Var_stmt_baseContext>> VisitArg_list(BRAQParser.Arg_listContext context)
