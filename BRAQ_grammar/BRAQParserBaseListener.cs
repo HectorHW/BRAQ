@@ -167,6 +167,18 @@ public partial class BRAQParserBaseListener : IBRAQParserListener {
 	/// <param name="context">The parse tree.</param>
 	public virtual void ExitCall([NotNull] BRAQParser.CallContext context) { }
 	/// <summary>
+	/// Enter a parse tree produced by <see cref="BRAQParser.call_or_literal"/>.
+	/// <para>The default implementation does nothing.</para>
+	/// </summary>
+	/// <param name="context">The parse tree.</param>
+	public virtual void EnterCall_or_literal([NotNull] BRAQParser.Call_or_literalContext context) { }
+	/// <summary>
+	/// Exit a parse tree produced by <see cref="BRAQParser.call_or_literal"/>.
+	/// <para>The default implementation does nothing.</para>
+	/// </summary>
+	/// <param name="context">The parse tree.</param>
+	public virtual void ExitCall_or_literal([NotNull] BRAQParser.Call_or_literalContext context) { }
+	/// <summary>
 	/// Enter a parse tree produced by <see cref="BRAQParser.arg_list"/>.
 	/// <para>The default implementation does nothing.</para>
 	/// </summary>

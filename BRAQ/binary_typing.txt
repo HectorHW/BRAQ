@@ -5,12 +5,24 @@ System.Int32 * System.Int32 -> System.Int32
 System.Int32 / System.Int32 -> System.Int32
 System.Int32 % System.Int32 -> System.Int32
 
+System.Double + System.Double -> System.Double
+System.Double - System.Double -> System.Double
+System.Double * System.Double -> System.Double
+System.Double / System.Double -> System.Double
+
 System.Int32 ?= System.Int32 -> System.Boolean
 System.Int32 != System.Int32 -> System.Boolean
 System.Int32 > System.Int32 -> System.Boolean
 System.Int32 >= System.Int32 -> System.Boolean
 System.Int32 < System.Int32 -> System.Boolean
 System.Int32 <= System.Int32 -> System.Boolean
+
+System.Double ?= System.Double -> System.Boolean
+System.Double != System.Double -> System.Boolean
+System.Double > System.Double -> System.Boolean
+System.Double >= System.Double -> System.Boolean
+System.Double < System.Double -> System.Boolean
+System.Double <= System.Double -> System.Boolean
 
 System.String ?= System.String -> System.Boolean
 System.String != System.String -> System.Boolean

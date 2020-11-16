@@ -258,15 +258,30 @@ namespace BRAQ
                     throw new TypeMismatchError(msg);
                 }
             }
-            
-            return base.VisitExpr(context);
+
+            return null;
         }
 
         public override Dictionary<ParserRuleContext, Type> VisitGroup(BRAQParser.GroupContext context)
         {
             context.containing.Accept(this);
             dict[context] = dict[context.containing];
-            return base.VisitGroup(context);
+            return null;
+        }
+
+        public override Dictionary<ParserRuleContext, Type> VisitCall_or_literal(BRAQParser.Call_or_literalContext context)
+        {
+            if (context.containing_call != null)
+            {
+                context.containing_call.Accept(this);
+                dict[context] = dict[context.containing_call];
+            }
+            else
+            {
+                context.containing_literal.Accept(this);
+                dict[context] = dict[context.containing_literal];
+            }
+            return null;
         }
 
         public override Dictionary<ParserRuleContext, Type> VisitCall(BRAQParser.CallContext context)
@@ -350,12 +365,17 @@ namespace BRAQ
                 dict[context] = typeof(string);
             }
             
-            else
+            else if (context.var_node_!=null)
             {
                 context.var_node_.Accept(this);
                 dict[context] = dict[context.var_node_];
             }
-            return base.VisitLiteral(context);
+            else if (context.double_num != null)
+            {
+                dict[context] = typeof(double);
+            }
+
+            return null;
         }
 
         public override Dictionary<ParserRuleContext, Type> VisitVar_node(BRAQParser.Var_nodeContext context)
@@ -364,8 +384,8 @@ namespace BRAQ
             var assigner = assigners.Find(x => x.a == var_name).b;
             assigner.Accept(this);
             dict[context] = dict[assigner];
-            
-            return base.VisitVar_node(context);
+
+            return null;
         }
     }
 

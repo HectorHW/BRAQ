@@ -141,6 +141,16 @@ public interface IBRAQParserListener : IParseTreeListener {
 	/// <param name="context">The parse tree.</param>
 	void ExitCall([NotNull] BRAQParser.CallContext context);
 	/// <summary>
+	/// Enter a parse tree produced by <see cref="BRAQParser.call_or_literal"/>.
+	/// </summary>
+	/// <param name="context">The parse tree.</param>
+	void EnterCall_or_literal([NotNull] BRAQParser.Call_or_literalContext context);
+	/// <summary>
+	/// Exit a parse tree produced by <see cref="BRAQParser.call_or_literal"/>.
+	/// </summary>
+	/// <param name="context">The parse tree.</param>
+	void ExitCall_or_literal([NotNull] BRAQParser.Call_or_literalContext context);
+	/// <summary>
 	/// Enter a parse tree produced by <see cref="BRAQParser.arg_list"/>.
 	/// </summary>
 	/// <param name="context">The parse tree.</param>

@@ -42,9 +42,12 @@ expr: num=literal
 group: LBRACKET containing=expr RBRACKET;
 
 //call: calee=ID AT_OPERATOR arguments=arg_list;
-call: calee=ID (AT_OPERATOR single_argument=expr | LBRACKET multiple_arguments=arg_list RBRACKET);
+call: calee=ID (AT_OPERATOR single_argument=call_or_literal | LBRACKET multiple_arguments=arg_list RBRACKET);
+
+call_or_literal: containing_call=call | containing_literal=literal;
+
 arg_list: expr* ;
 
-literal: num=NUMBER|var_node_=var_node|str=STRING;
+literal: num=NUMBER| double_num=DOUBLE_NUMBER|var_node_=var_node|str=STRING;
 
 var_node: id_name=ID;

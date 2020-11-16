@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Globalization;
 using System.Reflection;
 using System.Reflection.Emit;
 using Antlr4.Runtime;
@@ -74,6 +75,13 @@ namespace BRAQ
                 
                 il.Emit(OpCodes.Ldstr, unquoted);
             }
+            
+            else if (context.double_num != null)
+            {
+                Console.WriteLine($"double constant {context.double_num.Text}");
+                il.Emit(OpCodes.Ldc_R8, double.Parse(context.double_num.Text, new CultureInfo("en-us")));
+            }
+            
             else
             {
                 context.var_node_.Accept(this); //variable

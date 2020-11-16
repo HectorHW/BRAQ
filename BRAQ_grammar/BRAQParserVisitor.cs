@@ -98,6 +98,12 @@ public interface IBRAQParserVisitor<Result> : IParseTreeVisitor<Result> {
 	/// <return>The visitor result.</return>
 	Result VisitCall([NotNull] BRAQParser.CallContext context);
 	/// <summary>
+	/// Visit a parse tree produced by <see cref="BRAQParser.call_or_literal"/>.
+	/// </summary>
+	/// <param name="context">The parse tree.</param>
+	/// <return>The visitor result.</return>
+	Result VisitCall_or_literal([NotNull] BRAQParser.Call_or_literalContext context);
+	/// <summary>
 	/// Visit a parse tree produced by <see cref="BRAQParser.arg_list"/>.
 	/// </summary>
 	/// <param name="context">The parse tree.</param>

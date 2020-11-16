@@ -26,6 +26,8 @@ NOT: 'not';
 
 NUMBER: [0-9]+;
 
+DOUBLE_NUMBER: [0-9]+ '.' [0-9]+;
+
 LBRACKET : '(';
 RBRACKET : ')';
 
