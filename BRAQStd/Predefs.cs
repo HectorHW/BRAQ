@@ -31,7 +31,13 @@ namespace BRAQ
         public static string readLine() => Console.ReadLine();
         
         public static double readDouble() => double.Parse(Console.ReadLine());
-        
-        
+
+        public static void print(string line) => Console.WriteLine(line);
+
+        public static void print(double d) => Console.WriteLine(d);
+
+        public static void print(int i) => Console.WriteLine(i);
+        public static void print(bool b) => Console.WriteLine(b);
+
     }
 }
