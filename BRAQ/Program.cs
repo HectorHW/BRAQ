@@ -39,8 +39,8 @@ namespace BRAQ
             
             var dict_arr_pair = ast.Accept(new VariableResolverVisitor());
 
-            Dictionary<IToken, BRAQParser.Var_stmt_baseContext> mention_to_def = dict_arr_pair.a;
-            ArrayList<BRAQParser.Var_stmt_baseContext> var_list = dict_arr_pair.b;
+            Dictionary<IToken, BRAQParser.Var_stmtContext> mention_to_def = dict_arr_pair.a;
+            ArrayList<BRAQParser.Var_stmtContext> var_list = dict_arr_pair.b;
 
             Console.WriteLine(var_list.Count);
             Console.WriteLine(mention_to_def.Count);

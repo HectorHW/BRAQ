@@ -39,23 +39,31 @@ namespace BRAQ
                 return left == obj_.left && right == obj_.right && op == obj_.op;
             }
         }
-        
-        
-        
-        
+
         private Dictionary<ParserRuleContext, Type> dict;
 
         public Dictionary<IToken, MethodInfo> function_table = new Dictionary<IToken, MethodInfo>();
-
-        private List<Pair<string, ParserRuleContext>> assigners;
-        //private Dictionary<string, Type> varname_type_dict;
-
         
-        //указывает на объявление переменной
-        private Dictionary<string, BRAQParser.Var_stmt_baseContext> varname_dict;
         private List<TypeHelper> TypeAllowances;
+        
+        
+        //NEW
+        // для каждого упоминания переменной найдём точку объявления
+        private Dictionary<IToken, BRAQParser.Var_stmtContext> variable_to_declaration;
+        //для каждого объявления найдём тип
+        private Dictionary<BRAQParser.Var_stmtContext, Type> declaration_to_type;
 
-        public static Pair<Dictionary<ParserRuleContext, Type>, Dictionary<IToken, MethodInfo>> solveTypes(BRAQParser.ProgramContext context)
+
+        public struct TyperResult
+        {
+            public Dictionary<ParserRuleContext, Type> expr_type;
+            public Dictionary<IToken, MethodInfo> outer_function_table;
+            public Dictionary<IToken, MethodInfo> user_function_table; // yet unused
+        }
+        
+        
+
+        public static TyperResult solveTypes(BRAQParser.ProgramContext context)
         {
             //check that there are no unassigned variables
             var assigners = AssignCheckVisitor.getAssigners(context);
@@ -64,8 +72,10 @@ namespace BRAQ
             //make types
             var visitor = new TyperVisitor(assigners);
             context.Accept(visitor);
-            return new Pair<Dictionary<ParserRuleContext, Type>, Dictionary<IToken, MethodInfo>>
-                (visitor.dict, visitor.function_table);
+            var res = new TyperResult();
+            res.expr_type = visitor.dict;
+            res.outer_function_table = visitor.function_table;
+            return res;
         }
         
         
@@ -74,7 +84,7 @@ namespace BRAQ
             //varname_type_dict = new Dictionary<string, Type>();
             dict = new Dictionary<ParserRuleContext, Type>();
             this.assigners = assigners;
-            varname_dict = new Dictionary<string, BRAQParser.Var_stmt_baseContext>();
+            varname_dict = new Dictionary<string, BRAQParser.Var_stmtContext>();
 
             TypeAllowances = File.ReadAllText("binary_typing.txt")
                 .Split(new[] {'\n', '\r'}, StringSplitOptions.RemoveEmptyEntries)
@@ -97,11 +107,6 @@ namespace BRAQ
                     
                     
                     ).ToList();
-                
-                
-                
-                
-                ;
 
         }
 
@@ -110,17 +115,6 @@ namespace BRAQ
         {
             base.VisitProgram(context);
             return dict;
-        }
-
-        public override Dictionary<ParserRuleContext, Type> VisitBlock(BRAQParser.BlockContext context)
-        {
-            return base.VisitBlock(context);
-        }
-
-        public override Dictionary<ParserRuleContext, Type> VisitStmt(BRAQParser.StmtContext context)
-        {
-            
-            return base.VisitStmt(context);
         }
 
         public override Dictionary<ParserRuleContext, Type> VisitIf_stmt(BRAQParser.If_stmtContext context)
@@ -142,7 +136,72 @@ namespace BRAQ
             return null;
         }
 
-        public override Dictionary<ParserRuleContext, Type> VisitVar_stmt_base(BRAQParser.Var_stmt_baseContext context)
+        public override Dictionary<ParserRuleContext, Type> VisitVar_stmt(BRAQParser.Var_stmtContext context)
+        {
+            if (context.assignee != null)
+            {
+                context.assignee.Accept(this);
+                varname_dict[context.id_name.Text] = context;
+                dict[context] = dict[context.assignee];
+            }
+            else
+            {
+                var assigner = assigners.Where(x => x.a == context.id_name.Text).Single().b;
+                assigner.Accept(this);
+                varname_dict[context.id_name.Text] = context;
+                dict[context] = dict[assigner];
+
+            }
+            return null;
+        }
+
+        public override Dictionary<ParserRuleContext, Type> VisitAssign(BRAQParser.AssignContext context)
+        {
+            if ()
+            return null;
+        }
+
+        public override Dictionary<ParserRuleContext, Type> VisitLogical_or(BRAQParser.Logical_orContext context)
+        {
+            return null;
+        }
+
+        public override Dictionary<ParserRuleContext, Type> VisitLogical_xor(BRAQParser.Logical_xorContext context)
+        {
+            return null;
+        }
+
+        public override Dictionary<ParserRuleContext, Type> VisitLogical_and(BRAQParser.Logical_andContext context)
+        {
+            return null;
+        }
+
+        public override Dictionary<ParserRuleContext, Type> VisitLogical_equal(BRAQParser.Logical_equalContext context)
+        {
+            return null;
+        }
+
+        public override Dictionary<ParserRuleContext, Type> VisitLogical_gr_le(BRAQParser.Logical_gr_leContext context)
+        {
+            return null;
+        }
+
+        public override Dictionary<ParserRuleContext, Type> VisitAddition(BRAQParser.AdditionContext context)
+        {
+            return null;
+        }
+
+        public override Dictionary<ParserRuleContext, Type> VisitMultiplication(BRAQParser.MultiplicationContext context)
+        {
+            return null;
+        }
+
+        public override Dictionary<ParserRuleContext, Type> VisitShort_call(BRAQParser.Short_callContext context)
+        {
+            return null;
+        }
+
+        /*public override Dictionary<ParserRuleContext, Type> VisitVar_stmt_base(BRAQParser.Var_stmt_baseContext context)
         {
             if (context.assignee != null)
             {
@@ -159,12 +218,8 @@ namespace BRAQ
 
             }
             return base.VisitVar_stmt_base(context);
-        }
-
-        public override Dictionary<ParserRuleContext, Type> VisitPrint_stmt_base(BRAQParser.Print_stmt_baseContext context)
-        {
-            return base.VisitPrint_stmt_base(context);
-        }
+        }*/
+        
 
         public override Dictionary<ParserRuleContext, Type> VisitAssign_stmt_base(BRAQParser.Assign_stmt_baseContext context)
         {
@@ -389,91 +444,6 @@ namespace BRAQ
         }
     }
 
-    class AssignCheckVisitor : BRAQParserBaseVisitor<int>
-    {
-        private Dictionary<string, bool> assigned;
-        private List<Pair<string, ParserRuleContext>> assigners;
-
-        public AssignCheckVisitor()
-        {
-            assigned = new Dictionary<string, bool>();
-            assigners = new List<Pair<string, ParserRuleContext>>();
-        }
-
-        public static List<Pair<string, ParserRuleContext>> getAssigners(ParserRuleContext context)
-        {
-            var v = new AssignCheckVisitor();
-            context.Accept(v);
-            return v.assigners;
-
-        }
-
-        public override int VisitProgram(BRAQParser.ProgramContext context)
-        {
-            base.VisitProgram(context);
-            if (assigned.ContainsValue(false))
-            {
-                string msg = $"variable {assigned.First(x => !x.Value).Key} was never assigned, cannot solve type.";
-                Console.WriteLine(msg);
-                throw new TypesolvingError(assigned);
-            }
-            return 0;
-        }
-
-        public override int VisitVar_stmt_base(BRAQParser.Var_stmt_baseContext context)
-        {
-            string var_name = context.id_name.Text;
-
-            assigned[var_name] = false;
-
-            if (context.assignee != null)
-            {
-                context.assignee.Accept(this);
-                assigned[var_name] = true;
-                assigners.Add(new Pair<string, ParserRuleContext>(var_name, context.assignee));
-            }
-            return 0;
-        }
-
-        public override int VisitVar_node(BRAQParser.Var_nodeContext context)
-        {
-            string var_name = context.id_name.Text;
-            if (!assigned[var_name])
-            {
-                string msg = $"using unassigned variable {var_name}";
-                Console.WriteLine(msg);
-                throw new TypesolvingError(assigned);
-            }
-            return base.VisitVar_node(context);
-        }
-
-
-        public override int VisitAssign_stmt_base(BRAQParser.Assign_stmt_baseContext context)
-        {
-            string var_name = context.id_name.Text;
-            if (!assigners.Select(x => x.a).Contains(var_name))
-            {
-                assigners.Add(new Pair<string, ParserRuleContext>(var_name, context.assignee));
-                assigned[var_name] = true;
-            }
-            return base.VisitAssign_stmt_base(context);
-        }
-
-        public override int VisitRead_stmt_base(BRAQParser.Read_stmt_baseContext context)
-        {
-            string var_name = context.arg.id_name.Text;
-            
-            if (!assigners.Select(x => x.a).Contains(var_name))
-            {
-                assigners.Add(new Pair<string, ParserRuleContext>(var_name, context));
-                assigned[var_name] = true;
-            }
-            
-            return base.VisitRead_stmt_base(context);
-        }
-    }
-    
-    
 
     public class TypeMismatchError : Exception
     {
@@ -496,10 +466,10 @@ namespace BRAQ
 
     public class TypesolvingError : Exception
     {
-        public Dictionary<string, bool> dict;
+       /* public Dictionary<string, bool> dict;
         public TypesolvingError(Dictionary<string, bool> assigned)
         {
             dict = assigned;
-        }
+        }*/
     }
 }
