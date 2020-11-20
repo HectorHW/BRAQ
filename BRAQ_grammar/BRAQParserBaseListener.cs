@@ -215,6 +215,18 @@ public partial class BRAQParserBaseListener : IBRAQParserListener {
 	/// <param name="context">The parse tree.</param>
 	public virtual void ExitMultiplication([NotNull] BRAQParser.MultiplicationContext context) { }
 	/// <summary>
+	/// Enter a parse tree produced by <see cref="BRAQParser.unary_not_neg"/>.
+	/// <para>The default implementation does nothing.</para>
+	/// </summary>
+	/// <param name="context">The parse tree.</param>
+	public virtual void EnterUnary_not_neg([NotNull] BRAQParser.Unary_not_negContext context) { }
+	/// <summary>
+	/// Exit a parse tree produced by <see cref="BRAQParser.unary_not_neg"/>.
+	/// <para>The default implementation does nothing.</para>
+	/// </summary>
+	/// <param name="context">The parse tree.</param>
+	public virtual void ExitUnary_not_neg([NotNull] BRAQParser.Unary_not_negContext context) { }
+	/// <summary>
 	/// Enter a parse tree produced by <see cref="BRAQParser.call"/>.
 	/// <para>The default implementation does nothing.</para>
 	/// </summary>

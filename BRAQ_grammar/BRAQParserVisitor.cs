@@ -122,6 +122,12 @@ public interface IBRAQParserVisitor<Result> : IParseTreeVisitor<Result> {
 	/// <return>The visitor result.</return>
 	Result VisitMultiplication([NotNull] BRAQParser.MultiplicationContext context);
 	/// <summary>
+	/// Visit a parse tree produced by <see cref="BRAQParser.unary_not_neg"/>.
+	/// </summary>
+	/// <param name="context">The parse tree.</param>
+	/// <return>The visitor result.</return>
+	Result VisitUnary_not_neg([NotNull] BRAQParser.Unary_not_negContext context);
+	/// <summary>
 	/// Visit a parse tree produced by <see cref="BRAQParser.call"/>.
 	/// </summary>
 	/// <param name="context">The parse tree.</param>

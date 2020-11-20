@@ -1,36 +1,37 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Globalization;
+using System.Linq;
 using System.Reflection;
 using System.Reflection.Emit;
 using Antlr4.Runtime;
-using Antlr4.Runtime.Dfa;
-using Antlr4.Runtime.Misc;
 
 namespace BRAQ
 {
     public class ILVisitor : BRAQParserBaseVisitor<int>
     {
         private ILGenerator il;
-        private Dictionary<IToken, BRAQParser.Var_stmt_baseContext> dict;
-        private readonly ArrayList<BRAQParser.Var_stmt_baseContext> _varList;
-        
-        private LocalBuilder for_print;
+        private Dictionary<IToken, BRAQParser.Var_stmtContext> variable_to_declaration;
+        private readonly BRAQParser.Var_stmtContext[] _varList;
+
         private Dictionary<ParserRuleContext, Type> type_dict;
 
         private Dictionary<IToken, MethodInfo> function_table;
 
         public ILVisitor(ILGenerator il, 
-            Dictionary<IToken, BRAQParser.Var_stmt_baseContext> dict, 
-            ArrayList<BRAQParser.Var_stmt_baseContext> var_list, 
-            Dictionary<ParserRuleContext, Type> type_dict,
-            Dictionary<IToken, MethodInfo> function_table)
+            //Dictionary<IToken, BRAQParser.Var_stmt_baseContext> dict, 
+            //ArrayList<BRAQParser.Var_stmt_baseContext> var_list, 
+            //Dictionary<ParserRuleContext, Type> type_dict,
+            //Dictionary<IToken, MethodInfo> function_table
+            AssignCheckVisitor.AssignCheckResult assignCheckResult,
+            TyperVisitor.TyperResult typerResult
+            )
         {
             this.il = il;
-            this.dict = dict;
-            _varList = var_list;
-            this.type_dict = type_dict;
-            this.function_table = function_table;
+            variable_to_declaration = assignCheckResult.token_to_def;
+            _varList = assignCheckResult.def_to_assign.Select(x => x.Key).ToArray();
+            type_dict = typerResult.expr_type;
+            function_table = typerResult.outer_function_table; //TODO user functions
         }
 
         public override int VisitIf_stmt(BRAQParser.If_stmtContext context)
@@ -91,26 +92,17 @@ namespace BRAQ
 
         public override int VisitVar_node(BRAQParser.Var_nodeContext context)
         {
-            dict.TryGetValue(context.id_name, out var var_decl);
-            int var_id = _varList.IndexOf(var_decl);
+            BRAQParser.Var_stmtContext declaration_point = variable_to_declaration[context.id_name];
+            int var_id = Array.IndexOf(_varList, declaration_point);
             il.Emit(OpCodes.Ldloc, var_id);
             return 0;
         }
 
-        public override int VisitRead_stmt_base(BRAQParser.Read_stmt_baseContext context)
-        {
-            //call read
-            il.EmitCall(OpCodes.Call, typeof(Console).GetMethod("ReadLine"), null);
-            
-            //call toInt
-            il.EmitCall(OpCodes.Call, typeof(int).GetMethod("Parse", new[]{typeof(string)}), null);
-            //save to var
-            dict.TryGetValue(context.arg.id_name, out var var_decl);
-            int var_id = _varList.IndexOf(var_decl);
-            il.Emit(OpCodes.Stloc, var_id);
-            return 0;
-        }
+        #region old_expr_generator
 
+            
+
+        /*
         public override int VisitExpr(BRAQParser.ExprContext context)
         {
             if (context.ChildCount == 1)
@@ -238,8 +230,7 @@ namespace BRAQ
                     break;
                 
                 case "xor":
-                    //вычисляются оба оператора
-                    // a xor b ~~~ a !=b ~~~ (a==b)==0
+                    
                     il.Emit(OpCodes.Ceq);
                     il.Emit(OpCodes.Ldc_I4_0);
                     il.Emit(OpCodes.Ceq);
@@ -248,92 +239,321 @@ namespace BRAQ
             }
 
             return 0;
-        }
-
-        public override int VisitGroup(BRAQParser.GroupContext context)
-        {
-            context.containing.Accept(this);
-            return 0;
-        }
+        }*/
+        #endregion
 
         public override int VisitCall(BRAQParser.CallContext context)
         {
             var function_ptr = function_table[context.calee];
-            if(context.single_argument!=null) context.single_argument.Accept(this);
-            else
+            
+            foreach (var exprContext in context.expr())
             {
-                foreach (var exprContext in context.multiple_arguments.expr())
-                {
-                    exprContext.Accept(this);
-                }
+                exprContext.Accept(this);
             }
-
             il.EmitCall(OpCodes.Call, function_ptr, null);
             return 0;
         }
-
-        public override int VisitAssign_stmt_base(BRAQParser.Assign_stmt_baseContext context)
-        {
-            
-            context.assignee.Accept(this);
-            
-
-            var target_token = context.id_name;
-            
-            dict.TryGetValue(target_token, out var var_decl);
-            int var_id = _varList.IndexOf(var_decl);
-
-            il.Emit(OpCodes.Stloc, var_id);
-            
-            
-            return 0;
-        }
-
-        public override int VisitPrint_stmt_base(BRAQParser.Print_stmt_baseContext context)
-        {
-            context.arg.Accept(this);
-
-            var T = type_dict[context.arg];
-            
-            il.EmitCall(OpCodes.Call, typeof(Console).GetMethod("WriteLine", new[]{T}), null);
-            
-            //il.Emit(OpCodes.Stloc, for_print); // var_i = stack[0]
-            
-            //il.EmitWriteLine(for_print); // print(var_i)
-            
-            return 0;
-        }
-
-        public override int VisitVar_stmt_base(BRAQParser.Var_stmt_baseContext context)
+        
+        public override int VisitVar_stmt(BRAQParser.Var_stmtContext context)
         {
             if (context.assignee != null)
             {
                 context.assignee.Accept(this);
                 
                 var target_token = context.id_name;
-            
-                dict.TryGetValue(target_token, out var var_decl);
-                int var_id = _varList.IndexOf(var_decl);
+
+                var assignment_point = variable_to_declaration[target_token];
+                int var_id = Array.IndexOf(_varList, assignment_point);
                 if (var_id == -1) throw new Exception();
                 //Console.WriteLine(var_id);
                 //Console.WriteLine(_varList[0]);
                 il.Emit(OpCodes.Stloc, var_id);
             }
+            return 0;
+        }
 
+        public override int VisitExpr_stmt(BRAQParser.Expr_stmtContext context)
+        {
+            context.containing.Accept(this);
+            if (type_dict[context.containing] != typeof(void))
+            {
+                il.Emit(OpCodes.Pop);
+            }
+            return 0;
+        }
+
+        public override int VisitAssign(BRAQParser.AssignContext context)
+        {
+            if (context.id_name != null)
+            {
+                context.assignee.Accept(this);
+            
+                var target_token = context.id_name;
+            
+                var assignment_point = variable_to_declaration[target_token];
+            
+                int var_id = Array.IndexOf(_varList, assignment_point);
+
+                il.Emit(OpCodes.Stloc, var_id);
+            }
+            else
+            {
+                context.assignee.Accept(this);
+            }
+            
+            
+            return 0;
+        }
+
+        public override int VisitLogical_or(BRAQParser.Logical_orContext context)
+        {
+            if (context.left != null)
+            {
+                context.left.Accept(this);
+            
+                //если левый истинный, тогда прыгаем, иначе правый
+                
+                Label truthey_or = il.DefineLabel(); //stack: left
+                il.Emit(OpCodes.Brtrue_S, truthey_or); //stack:
+                Label falsey_or = il.DefineLabel();
+
+                context.right.Accept(this); //stack: right
+                il.Emit(OpCodes.Br_S, falsey_or); //stack: right
+                    
+                il.MarkLabel(truthey_or); //from brtrue, stack: 
+                il.Emit(OpCodes.Ldc_I4_1);// stack : 1
+                    
+                il.MarkLabel(falsey_or); //from br_s, stack: right
+            }
+            else
+            {
+                context.right.Accept(this);
+            }
+            
+            return 0;
+        }
+
+        public override int VisitLogical_xor(BRAQParser.Logical_xorContext context)
+        {
+            if (context.left != null)
+            {
+                context.left.Accept(this);
+                context.right.Accept(this);
+                //вычисляются оба оператора
+                // a xor b ~~~ a !=b ~~~ (a==b)==0
+                
+                il.Emit(OpCodes.Ceq);
+                il.Emit(OpCodes.Ldc_I4_0);
+                il.Emit(OpCodes.Ceq);
+            }
+            else
+            {
+                context.right.Accept(this);
+            }
+            return 0;
+        }
+
+        public override int VisitLogical_and(BRAQParser.Logical_andContext context)
+        {
+            if (context.left != null)
+            {
+                context.left.Accept(this);
+                // если левый оператор ложный, тогда перепрыгиваем, иначе правый
+                Label falsey = il.DefineLabel(); //stack: left
+                il.Emit(OpCodes.Brfalse_S, falsey); //stack: 
+                context.right.Accept(this); //stack: right
+                Label truthey = il.DefineLabel();
+                il.Emit(OpCodes.Br_S, truthey); //stack: right
+                    
+                il.MarkLabel(falsey); //from Brfalse, stack: 
+                il.Emit(OpCodes.Ldc_I4_0); //stack: 0
+                il.MarkLabel(truthey); //from br_s, stack: right
+            }
+            else
+            {
+                context.right.Accept(this);
+            }
+            return 0;
+        }
+
+        public override int VisitLogical_equal(BRAQParser.Logical_equalContext context)
+        {
+            if (context.left != null)
+            {
+                context.left.Accept(this);
+                context.right.Accept(this);
+
+                if (context.op.Text == "?=")
+                {
+                    if (type_dict[context.left] == typeof(string))
+                    {
+                        il.EmitCall(OpCodes.Call, typeof(string).GetMethod("op_Equality",
+                            new[] {typeof(string), typeof(string)}) ?? throw new BindError(), null);
+                    }
+                    else
+                    {
+                        il.Emit(OpCodes.Ceq);
+                    }
+                }
+                else
+                {
+                    if (type_dict[context.left] == typeof(string))
+                    {
+                        il.EmitCall(OpCodes.Call, typeof(string).GetMethod("op_Inequality",
+                            new[] {typeof(string), typeof(string)}) ?? throw new BindError(), null);
+                    }
+                    else
+                    {
+                        il.Emit(OpCodes.Ceq);
+                        il.Emit(OpCodes.Ldc_I4_0);
+                        il.Emit(OpCodes.Ceq);
+                    }
+                }
+            }
+            else
+            {
+                context.right.Accept(this);
+            }
+            return 0;
+        }
+
+        public override int VisitLogical_gr_le(BRAQParser.Logical_gr_leContext context)
+        {
+            if (context.left != null)
+            {
+                context.left.Accept(this);
+                context.right.Accept(this);
+                switch (context.op.Text)
+                {
+                    case ">":
+                        il.Emit(OpCodes.Cgt);
+                        break;
+                    case ">=": // a>=b  ~~~ !(a<b) ~~~ (a<b) == 0
+                        il.Emit(OpCodes.Clt);
+                        il.Emit(OpCodes.Ldc_I4_0);
+                        il.Emit(OpCodes.Ceq);
+                        break;
+                    case "<":
+                        il.Emit(OpCodes.Clt);
+                        break;
+                    case "<=":
+                        il.Emit(OpCodes.Cgt);
+                        il.Emit(OpCodes.Ldc_I4_0);
+                        il.Emit(OpCodes.Ceq);
+                        break;
+                }
+            }
+            else
+            {
+                context.right.Accept(this);
+            }
+            return 0;
+        }
+
+        public override int VisitAddition(BRAQParser.AdditionContext context)
+        {
+            if (context.left != null)
+            {
+                context.left.Accept(this);
+                context.right.Accept(this);
+                switch (context.op.Text)
+                {
+                    case "+":
+                        if (type_dict[context.left] == typeof(string))
+                        {
+                            il.EmitCall(OpCodes.Call, typeof(string).GetMethod("Concat",
+                                new[] {typeof(string), typeof(string)}) ?? throw new BindError(), null);
+                        }
+                        else
+                        {
+                            il.Emit(OpCodes.Add);
+                        }
+                    
+                        break;
+                    case "-":
+                        il.Emit(OpCodes.Sub);
+                        break;
+                }
+            }
+            else
+            {
+                context.right.Accept(this);
+            }
+            return 0;
+        }
+
+        public override int VisitMultiplication(BRAQParser.MultiplicationContext context)
+        {
+            if (context.left != null)
+            {
+                context.left.Accept(this);
+                context.right.Accept(this);
+
+                switch (context.op.Text)
+                {
+                    case "*":
+                        il.Emit(OpCodes.Mul);
+                        break;
+                    case "/":
+                        il.Emit(OpCodes.Div);
+                        break;
+                    case "%":
+                        il.Emit(OpCodes.Rem);
+                        break;
+                }
+                
+            }
+            else
+            {
+                context.right.Accept(this);
+            }
+            return 0;
+        }
+
+        public override int VisitUnary_not_neg(BRAQParser.Unary_not_negContext context)
+        {
+            //one of
+            context.right_call?.Accept(this);
+            context.right_literal?.Accept(this);
+            context.right_short_call?.Accept(this);
+            if (context.op != null)
+            {
+                switch (context.op.Text)
+                {
+                    case "-":
+                        il.Emit(OpCodes.Neg);
+                        break;
+                    case "not":
+                        il.Emit(OpCodes.Ldc_I4_0);
+                        il.Emit(OpCodes.Ceq);
+                        break;
+                }
+            }
+
+            return 0;
+        }
+
+        public override int VisitShort_call(BRAQParser.Short_callContext context)
+        {
+            var function_ptr = function_table[context.calee];
+            //one of
+            context.c_arg?.Accept(this);
+            context.l_arg?.Accept(this);
+            context.sc_arg?.Accept(this);
+            
+            il.EmitCall(OpCodes.Call, function_ptr, null);
             return 0;
         }
 
         public override int VisitProgram(BRAQParser.ProgramContext context)
         {
             //define variables
-            for (int i = 0; i < _varList.Count; i++)
+            for (int i = 0; i < _varList.Length; i++)
             {
                 //il.DeclareLocal(typeof(int));
                 var T = type_dict[_varList[i]];
                 il.DeclareLocal(T);
             }
-            
-            for_print = il.DeclareLocal(typeof(int));
 
             base.VisitProgram(context);
 

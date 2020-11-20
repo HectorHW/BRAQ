@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Reflection;
@@ -74,8 +75,12 @@ namespace BRAQ
             res.outer_function_table = visitor.function_table;
             return res;
         }
-        
-        
+
+        public override Type VisitExpr(BRAQParser.ExprContext context)
+        {
+            return type_dict[context] = context.containing.Accept(this);
+        }
+
         private TyperVisitor(AssignCheckVisitor.AssignCheckResult assigners)
         {
             variable_to_declaration = assigners.token_to_def;
@@ -160,7 +165,7 @@ namespace BRAQ
                     throw new TypeMismatchError();
                 }
             }
-            return null;
+            return right_type;
         }
         #region boring_binary
         public override Type VisitLogical_or(BRAQParser.Logical_orContext context)
@@ -192,25 +197,61 @@ namespace BRAQ
         {
             return binary_optional_left_expr(context, context.left, context.op, context.right);
         }
-        #endregion
+        
 
         public override Type VisitMultiplication(BRAQParser.MultiplicationContext context)
         {
+            return binary_optional_left_expr(context, context.left, context.op, context.right);
+        }
+        #endregion
+        
+        public override Type VisitUnary_not_neg(BRAQParser.Unary_not_negContext context)
+        {
             //right: right_short_call=short_call | right_call=call | right_literal=literal
+            Type right_type;
             if (context.right_short_call != null)
             {
-                return binary_optional_left_expr(context, context.left, context.op, context.right_short_call);
+                right_type = context.right_short_call.Accept(this);
             }
-            if (context.right_call != null)
+            else if (context.right_call != null)
             {
-                return binary_optional_left_expr(context, context.left, context.op, context.right_call);
+                right_type = context.right_call.Accept(this);
             }
-            if (context.right_literal != null)
+            else if (context.right_literal != null)
             {
-                return binary_optional_left_expr(context, context.left, context.op, context.right_literal);
+                right_type = context.right_literal.Accept(this);
+            }
+            else
+            {
+                throw new NotImplementedException();
             }
 
-            throw new NotImplementedException();
+            if (context.op != null)
+            {
+                try
+                {
+                    Console.WriteLine(context.op.Text);
+                    Console.WriteLine(right_type);
+                    
+                    var type_pair = TypeAllowances
+                        .Find(x => 
+                            x.Equals(new TypeHelper(null, right_type, context.op.Text, null)));
+                    type_dict[context] = type_pair.result;
+                    Console.WriteLine(type_pair.result);
+                    return type_dict[context];
+                }
+                catch(ArgumentNullException )
+                {
+                    string msg = $"Failed to find matching operator {context.op.Text} for type {right_type} [Line {context.op.Line}]";
+                    Console.WriteLine(msg);
+                    throw new TypeMismatchError(msg);
+                }  
+            }
+
+            type_dict[context] = right_type;
+            return right_type;
+
+
         }
 
         public override Type VisitShort_call(BRAQParser.Short_callContext context)
@@ -346,8 +387,8 @@ namespace BRAQ
         public override Type VisitGroup(BRAQParser.GroupContext context)
         {
             context.containing.Accept(this);
-            type_dict[context] = type_dict[context.containing];
-            return null;
+            
+            return type_dict[context] = type_dict[context.containing];
         }
         
         public override Type VisitCall(BRAQParser.CallContext context)
@@ -355,13 +396,13 @@ namespace BRAQ
             //TODO
             //get argument list
 
-            Console.WriteLine(context.expr().Length);
+            
                 
             foreach (var exprContext in context.expr())
             {
                 exprContext.Accept(this);
             }
-
+            Console.WriteLine(context.expr().Length);
             Type[] types = context.expr().Select(x => type_dict[x]).ToArray();
             
 
@@ -476,6 +517,7 @@ namespace BRAQ
             Type resulting_type = get_binary_operator_result(left_type, right_type, op);
 
             type_dict[context] = resulting_type;
+            Debug.Assert(resulting_type != null && resulting_type != typeof(void));
             return resulting_type;
 
         }

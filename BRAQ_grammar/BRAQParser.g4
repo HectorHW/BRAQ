@@ -14,7 +14,7 @@ if_stmt: IF cond=expr then_branch=block (ELSE else_branch=block)?;
 
 // ID @ (params?) = expr
 var_stmt: VAR id_name=ID (EQUALS assignee=expr)? SEMICOLON;
-expr_stmt: expr SEMICOLON;
+expr_stmt: containing=expr SEMICOLON;
 
 
 
@@ -44,9 +44,10 @@ logical_and:  left=logical_and op=AND right=logical_equal |  right=logical_equal
 logical_equal:  left=logical_equal op=(EQ|NE) right=logical_gr_le | right=logical_gr_le;
 logical_gr_le:  left=addition op=(GR|GE|LS|LE) right=addition | right=addition;
 addition:  left=addition op=(PLUS|MINUS) right=multiplication | right=multiplication;
-multiplication:  left=multiplication op=(STAR|SLASH|MODULUS) (right_short_call=short_call | right_call=call | right_literal=literal) 
+multiplication:  left=multiplication op=(STAR|SLASH|MODULUS) right=unary_not_neg 
+| right=unary_not_neg;
+unary_not_neg: op=(NOT|MINUS) (right_short_call=short_call | right_call=call | right_literal=literal) 
 | (right_short_call=short_call | right_call=call | right_literal=literal);
-
 call: calee=ID LBRACKET expr* RBRACKET;
 short_call: calee=ID AT_OPERATOR (sc_arg=short_call|c_arg=call|l_arg=literal);
 
