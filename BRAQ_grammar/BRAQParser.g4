@@ -44,7 +44,7 @@ logical_and: logical_and AND logical_equal |  logical_equal;
 logical_equal: logical_equal op=(EQ|NE) logical_gr_le | logical_gr_le;
 logical_gr_le: addition op=(GR|GE|LS|LE) addition | addition;
 addition: addition op=(PLUS|MINUS) multiplication | multiplication;
-multiplication: multiplication op=(STAR|SLASH|MODULUS) (call | literal) | (short_call| call | literal);
+multiplication: multiplication op=(STAR|SLASH|MODULUS) (short_call | call | literal) | (short_call | call | literal);
 
 call: calee=ID LBRACKET expr* RBRACKET;
 short_call: calee=ID AT_OPERATOR (short_call|call|literal);

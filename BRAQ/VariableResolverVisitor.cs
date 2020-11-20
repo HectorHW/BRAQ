@@ -6,44 +6,38 @@ using Antlr4.Runtime.Misc;
 
 namespace BRAQ
 {
-    public class VariableResolverVisitor : BRAQParserBaseVisitor<Pair<Dictionary<IToken, BRAQParser.Var_stmt_baseContext>, ArrayList<BRAQParser.Var_stmt_baseContext>>>
+    public class VariableResolverVisitor : BRAQParserBaseVisitor<Pair<Dictionary<IToken, BRAQParser.Var_stmtContext>, ArrayList<BRAQParser.Var_stmtContext>>>
     {
-        private ArrayList<BRAQParser.Var_stmt_baseContext> variables
-            = new ArrayList<BRAQParser.Var_stmt_baseContext>();
+        private ArrayList<BRAQParser.Var_stmtContext> variables
+            = new ArrayList<BRAQParser.Var_stmtContext>();
         
-        private Dictionary<IToken, BRAQParser.Var_stmt_baseContext> dict 
-            = new Dictionary<IToken, BRAQParser.Var_stmt_baseContext>();
+        private Dictionary<IToken, BRAQParser.Var_stmtContext> dict 
+            = new Dictionary<IToken, BRAQParser.Var_stmtContext>();
 
         //словарь переменных, доступных из внешних областей видимости с объявлениями
-        private Dictionary<string, BRAQParser.Var_stmt_baseContext> outer_scopes 
-            = new Dictionary<string, BRAQParser.Var_stmt_baseContext>();
+        private Dictionary<string, BRAQParser.Var_stmtContext> outer_scopes 
+            = new Dictionary<string, BRAQParser.Var_stmtContext>();
 
-        private Dictionary<string, BRAQParser.Var_stmt_baseContext> local_scopes
-            = new Dictionary<string, BRAQParser.Var_stmt_baseContext>();
+        private Dictionary<string, BRAQParser.Var_stmtContext> local_scopes
+            = new Dictionary<string, BRAQParser.Var_stmtContext>();
 
-        public override Pair<Dictionary<IToken, BRAQParser.Var_stmt_baseContext>, ArrayList<BRAQParser.Var_stmt_baseContext>> 
+        public override Pair<Dictionary<IToken, BRAQParser.Var_stmtContext>, ArrayList<BRAQParser.Var_stmtContext>> 
             VisitProgram(BRAQParser.ProgramContext context)
         {
              base.VisitProgram(context);
-             return new Pair<Dictionary<IToken, BRAQParser.Var_stmt_baseContext>, ArrayList<BRAQParser.Var_stmt_baseContext>>(dict, variables);
+             return new Pair<Dictionary<IToken, BRAQParser.Var_stmtContext>, ArrayList<BRAQParser.Var_stmtContext>>(dict, variables);
         }
-
-        public override Pair<Dictionary<IToken, BRAQParser.Var_stmt_baseContext>, ArrayList<BRAQParser.Var_stmt_baseContext>> 
-            VisitVar_stmt_base(BRAQParser.Var_stmt_baseContext context)
+        
+        public override Pair<Dictionary<IToken, BRAQParser.Var_stmtContext>, ArrayList<BRAQParser.Var_stmtContext>> VisitVar_stmt(BRAQParser.Var_stmtContext context)
         {
-            if (context.assignee != null)
-            {
-                context.assignee.Accept(this);
-                
-            }
+            context.assignee?.Accept(this);
 
-            
             string var_name = context.id_name.Text;
             
             if (local_scopes.ContainsKey(var_name)) throw new RedefinedVariableError(context.id_name);
-
+            
             local_scopes[var_name] = context;
-
+            
             variables.Add(context);
             
             if (context.assignee != null)
@@ -55,18 +49,29 @@ namespace BRAQ
             return null;
         }
 
-        public override Pair<Dictionary<IToken, BRAQParser.Var_stmt_baseContext>, ArrayList<BRAQParser.Var_stmt_baseContext>> VisitCall(BRAQParser.CallContext context)
+        public override Pair<Dictionary<IToken, BRAQParser.Var_stmtContext>, ArrayList<BRAQParser.Var_stmtContext>> VisitAssign(BRAQParser.AssignContext context)
         {
+            if (context.id_name != null) //is an assignment
+            {
+                context.assignee.Accept(this);
             
-                return base.VisitCall(context);
+                string var_name = context.id_name.Text;
+
+                if (local_scopes.ContainsKey(var_name))
+                {
+                    dict[context.id_name] = local_scopes[context.id_name.Text];
+                }else if (outer_scopes.ContainsKey(var_name))
+                {
+                    dict[context.id_name] = outer_scopes[context.id_name.Text];
+                }else
+                    throw new UndefinedVariableError(context.id_name);
+                
+                return null;
+            }
+            return base.VisitAssign(context);
         }
 
-        public override Pair<Dictionary<IToken, BRAQParser.Var_stmt_baseContext>, ArrayList<BRAQParser.Var_stmt_baseContext>> VisitArg_list(BRAQParser.Arg_listContext context)
-        {
-            return base.VisitArg_list(context);
-        }
-
-        public override Pair<Dictionary<IToken, BRAQParser.Var_stmt_baseContext>, ArrayList<BRAQParser.Var_stmt_baseContext>> 
+        public override Pair<Dictionary<IToken, BRAQParser.Var_stmtContext>, ArrayList<BRAQParser.Var_stmtContext>> 
             VisitVar_node(BRAQParser.Var_nodeContext context)
         {
             string var_name = context.id_name.Text;
@@ -83,49 +88,11 @@ namespace BRAQ
             return null;
         }
 
-
-        public override Pair<Dictionary<IToken, BRAQParser.Var_stmt_baseContext>, ArrayList<BRAQParser.Var_stmt_baseContext>> VisitAssign_stmt_base(
-            BRAQParser.Assign_stmt_baseContext context)
+        private static Dictionary<IToken, BRAQParser.Var_stmtContext> overshadow(
+            Dictionary<IToken, BRAQParser.Var_stmtContext> outer,
+            Dictionary<IToken, BRAQParser.Var_stmtContext> inter)
         {
-            context.assignee.Accept(this);
-            
-            string var_name = context.id_name.Text;
-
-            if (local_scopes.ContainsKey(var_name))
-            {
-                dict[context.id_name] = local_scopes[context.id_name.Text];
-            }else if (outer_scopes.ContainsKey(var_name))
-            {
-                dict[context.id_name] = outer_scopes[context.id_name.Text];
-            }else
-                throw new UndefinedVariableError(context.id_name);
-            
-            
-            return base.VisitAssign_stmt_base(context);
-        }
-
-        public override Pair<Dictionary<IToken, BRAQParser.Var_stmt_baseContext>, ArrayList<BRAQParser.Var_stmt_baseContext>> VisitRead_stmt_base(BRAQParser.Read_stmt_baseContext context)
-        {
-            
-            string var_name = context.arg.id_name.Text;
-
-            if (local_scopes.ContainsKey(var_name))
-            {
-                dict[context.arg.id_name] = local_scopes[ context.arg.id_name.Text];
-            }else if (outer_scopes.ContainsKey(var_name))
-            {
-                dict[context.arg.id_name] = outer_scopes[ context.arg.id_name.Text];
-            }else
-                throw new UndefinedVariableError( context.arg.id_name);
-            
-            return base.VisitRead_stmt_base(context);
-        }
-
-        private static Dictionary<IToken, BRAQParser.Var_stmt_baseContext> overshadow(
-            Dictionary<IToken, BRAQParser.Var_stmt_baseContext> outer,
-            Dictionary<IToken, BRAQParser.Var_stmt_baseContext> inter)
-        {
-            var answ = new Dictionary<IToken, BRAQParser.Var_stmt_baseContext>();
+            var answ = new Dictionary<IToken, BRAQParser.Var_stmtContext>();
             foreach (var varStmtBaseContext in outer)
             {
                 answ[varStmtBaseContext.Key] = varStmtBaseContext.Value;
