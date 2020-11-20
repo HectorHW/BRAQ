@@ -71,45 +71,25 @@ public interface IBRAQParserListener : IParseTreeListener {
 	/// <param name="context">The parse tree.</param>
 	void ExitIf_stmt([NotNull] BRAQParser.If_stmtContext context);
 	/// <summary>
-	/// Enter a parse tree produced by <see cref="BRAQParser.var_stmt_base"/>.
+	/// Enter a parse tree produced by <see cref="BRAQParser.var_stmt"/>.
 	/// </summary>
 	/// <param name="context">The parse tree.</param>
-	void EnterVar_stmt_base([NotNull] BRAQParser.Var_stmt_baseContext context);
+	void EnterVar_stmt([NotNull] BRAQParser.Var_stmtContext context);
 	/// <summary>
-	/// Exit a parse tree produced by <see cref="BRAQParser.var_stmt_base"/>.
+	/// Exit a parse tree produced by <see cref="BRAQParser.var_stmt"/>.
 	/// </summary>
 	/// <param name="context">The parse tree.</param>
-	void ExitVar_stmt_base([NotNull] BRAQParser.Var_stmt_baseContext context);
+	void ExitVar_stmt([NotNull] BRAQParser.Var_stmtContext context);
 	/// <summary>
-	/// Enter a parse tree produced by <see cref="BRAQParser.print_stmt_base"/>.
+	/// Enter a parse tree produced by <see cref="BRAQParser.expr_stmt"/>.
 	/// </summary>
 	/// <param name="context">The parse tree.</param>
-	void EnterPrint_stmt_base([NotNull] BRAQParser.Print_stmt_baseContext context);
+	void EnterExpr_stmt([NotNull] BRAQParser.Expr_stmtContext context);
 	/// <summary>
-	/// Exit a parse tree produced by <see cref="BRAQParser.print_stmt_base"/>.
+	/// Exit a parse tree produced by <see cref="BRAQParser.expr_stmt"/>.
 	/// </summary>
 	/// <param name="context">The parse tree.</param>
-	void ExitPrint_stmt_base([NotNull] BRAQParser.Print_stmt_baseContext context);
-	/// <summary>
-	/// Enter a parse tree produced by <see cref="BRAQParser.assign_stmt_base"/>.
-	/// </summary>
-	/// <param name="context">The parse tree.</param>
-	void EnterAssign_stmt_base([NotNull] BRAQParser.Assign_stmt_baseContext context);
-	/// <summary>
-	/// Exit a parse tree produced by <see cref="BRAQParser.assign_stmt_base"/>.
-	/// </summary>
-	/// <param name="context">The parse tree.</param>
-	void ExitAssign_stmt_base([NotNull] BRAQParser.Assign_stmt_baseContext context);
-	/// <summary>
-	/// Enter a parse tree produced by <see cref="BRAQParser.read_stmt_base"/>.
-	/// </summary>
-	/// <param name="context">The parse tree.</param>
-	void EnterRead_stmt_base([NotNull] BRAQParser.Read_stmt_baseContext context);
-	/// <summary>
-	/// Exit a parse tree produced by <see cref="BRAQParser.read_stmt_base"/>.
-	/// </summary>
-	/// <param name="context">The parse tree.</param>
-	void ExitRead_stmt_base([NotNull] BRAQParser.Read_stmt_baseContext context);
+	void ExitExpr_stmt([NotNull] BRAQParser.Expr_stmtContext context);
 	/// <summary>
 	/// Enter a parse tree produced by <see cref="BRAQParser.expr"/>.
 	/// </summary>
@@ -121,15 +101,85 @@ public interface IBRAQParserListener : IParseTreeListener {
 	/// <param name="context">The parse tree.</param>
 	void ExitExpr([NotNull] BRAQParser.ExprContext context);
 	/// <summary>
-	/// Enter a parse tree produced by <see cref="BRAQParser.group"/>.
+	/// Enter a parse tree produced by <see cref="BRAQParser.assign"/>.
 	/// </summary>
 	/// <param name="context">The parse tree.</param>
-	void EnterGroup([NotNull] BRAQParser.GroupContext context);
+	void EnterAssign([NotNull] BRAQParser.AssignContext context);
 	/// <summary>
-	/// Exit a parse tree produced by <see cref="BRAQParser.group"/>.
+	/// Exit a parse tree produced by <see cref="BRAQParser.assign"/>.
 	/// </summary>
 	/// <param name="context">The parse tree.</param>
-	void ExitGroup([NotNull] BRAQParser.GroupContext context);
+	void ExitAssign([NotNull] BRAQParser.AssignContext context);
+	/// <summary>
+	/// Enter a parse tree produced by <see cref="BRAQParser.logical_or"/>.
+	/// </summary>
+	/// <param name="context">The parse tree.</param>
+	void EnterLogical_or([NotNull] BRAQParser.Logical_orContext context);
+	/// <summary>
+	/// Exit a parse tree produced by <see cref="BRAQParser.logical_or"/>.
+	/// </summary>
+	/// <param name="context">The parse tree.</param>
+	void ExitLogical_or([NotNull] BRAQParser.Logical_orContext context);
+	/// <summary>
+	/// Enter a parse tree produced by <see cref="BRAQParser.logical_xor"/>.
+	/// </summary>
+	/// <param name="context">The parse tree.</param>
+	void EnterLogical_xor([NotNull] BRAQParser.Logical_xorContext context);
+	/// <summary>
+	/// Exit a parse tree produced by <see cref="BRAQParser.logical_xor"/>.
+	/// </summary>
+	/// <param name="context">The parse tree.</param>
+	void ExitLogical_xor([NotNull] BRAQParser.Logical_xorContext context);
+	/// <summary>
+	/// Enter a parse tree produced by <see cref="BRAQParser.logical_and"/>.
+	/// </summary>
+	/// <param name="context">The parse tree.</param>
+	void EnterLogical_and([NotNull] BRAQParser.Logical_andContext context);
+	/// <summary>
+	/// Exit a parse tree produced by <see cref="BRAQParser.logical_and"/>.
+	/// </summary>
+	/// <param name="context">The parse tree.</param>
+	void ExitLogical_and([NotNull] BRAQParser.Logical_andContext context);
+	/// <summary>
+	/// Enter a parse tree produced by <see cref="BRAQParser.logical_equal"/>.
+	/// </summary>
+	/// <param name="context">The parse tree.</param>
+	void EnterLogical_equal([NotNull] BRAQParser.Logical_equalContext context);
+	/// <summary>
+	/// Exit a parse tree produced by <see cref="BRAQParser.logical_equal"/>.
+	/// </summary>
+	/// <param name="context">The parse tree.</param>
+	void ExitLogical_equal([NotNull] BRAQParser.Logical_equalContext context);
+	/// <summary>
+	/// Enter a parse tree produced by <see cref="BRAQParser.logical_gr_le"/>.
+	/// </summary>
+	/// <param name="context">The parse tree.</param>
+	void EnterLogical_gr_le([NotNull] BRAQParser.Logical_gr_leContext context);
+	/// <summary>
+	/// Exit a parse tree produced by <see cref="BRAQParser.logical_gr_le"/>.
+	/// </summary>
+	/// <param name="context">The parse tree.</param>
+	void ExitLogical_gr_le([NotNull] BRAQParser.Logical_gr_leContext context);
+	/// <summary>
+	/// Enter a parse tree produced by <see cref="BRAQParser.addition"/>.
+	/// </summary>
+	/// <param name="context">The parse tree.</param>
+	void EnterAddition([NotNull] BRAQParser.AdditionContext context);
+	/// <summary>
+	/// Exit a parse tree produced by <see cref="BRAQParser.addition"/>.
+	/// </summary>
+	/// <param name="context">The parse tree.</param>
+	void ExitAddition([NotNull] BRAQParser.AdditionContext context);
+	/// <summary>
+	/// Enter a parse tree produced by <see cref="BRAQParser.multiplication"/>.
+	/// </summary>
+	/// <param name="context">The parse tree.</param>
+	void EnterMultiplication([NotNull] BRAQParser.MultiplicationContext context);
+	/// <summary>
+	/// Exit a parse tree produced by <see cref="BRAQParser.multiplication"/>.
+	/// </summary>
+	/// <param name="context">The parse tree.</param>
+	void ExitMultiplication([NotNull] BRAQParser.MultiplicationContext context);
 	/// <summary>
 	/// Enter a parse tree produced by <see cref="BRAQParser.call"/>.
 	/// </summary>
@@ -141,25 +191,15 @@ public interface IBRAQParserListener : IParseTreeListener {
 	/// <param name="context">The parse tree.</param>
 	void ExitCall([NotNull] BRAQParser.CallContext context);
 	/// <summary>
-	/// Enter a parse tree produced by <see cref="BRAQParser.call_or_literal"/>.
+	/// Enter a parse tree produced by <see cref="BRAQParser.short_call"/>.
 	/// </summary>
 	/// <param name="context">The parse tree.</param>
-	void EnterCall_or_literal([NotNull] BRAQParser.Call_or_literalContext context);
+	void EnterShort_call([NotNull] BRAQParser.Short_callContext context);
 	/// <summary>
-	/// Exit a parse tree produced by <see cref="BRAQParser.call_or_literal"/>.
+	/// Exit a parse tree produced by <see cref="BRAQParser.short_call"/>.
 	/// </summary>
 	/// <param name="context">The parse tree.</param>
-	void ExitCall_or_literal([NotNull] BRAQParser.Call_or_literalContext context);
-	/// <summary>
-	/// Enter a parse tree produced by <see cref="BRAQParser.arg_list"/>.
-	/// </summary>
-	/// <param name="context">The parse tree.</param>
-	void EnterArg_list([NotNull] BRAQParser.Arg_listContext context);
-	/// <summary>
-	/// Exit a parse tree produced by <see cref="BRAQParser.arg_list"/>.
-	/// </summary>
-	/// <param name="context">The parse tree.</param>
-	void ExitArg_list([NotNull] BRAQParser.Arg_listContext context);
+	void ExitShort_call([NotNull] BRAQParser.Short_callContext context);
 	/// <summary>
 	/// Enter a parse tree produced by <see cref="BRAQParser.literal"/>.
 	/// </summary>
@@ -170,6 +210,16 @@ public interface IBRAQParserListener : IParseTreeListener {
 	/// </summary>
 	/// <param name="context">The parse tree.</param>
 	void ExitLiteral([NotNull] BRAQParser.LiteralContext context);
+	/// <summary>
+	/// Enter a parse tree produced by <see cref="BRAQParser.group"/>.
+	/// </summary>
+	/// <param name="context">The parse tree.</param>
+	void EnterGroup([NotNull] BRAQParser.GroupContext context);
+	/// <summary>
+	/// Exit a parse tree produced by <see cref="BRAQParser.group"/>.
+	/// </summary>
+	/// <param name="context">The parse tree.</param>
+	void ExitGroup([NotNull] BRAQParser.GroupContext context);
 	/// <summary>
 	/// Enter a parse tree produced by <see cref="BRAQParser.var_node"/>.
 	/// </summary>

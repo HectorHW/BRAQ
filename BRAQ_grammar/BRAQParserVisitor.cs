@@ -56,29 +56,17 @@ public interface IBRAQParserVisitor<Result> : IParseTreeVisitor<Result> {
 	/// <return>The visitor result.</return>
 	Result VisitIf_stmt([NotNull] BRAQParser.If_stmtContext context);
 	/// <summary>
-	/// Visit a parse tree produced by <see cref="BRAQParser.var_stmt_base"/>.
+	/// Visit a parse tree produced by <see cref="BRAQParser.var_stmt"/>.
 	/// </summary>
 	/// <param name="context">The parse tree.</param>
 	/// <return>The visitor result.</return>
-	Result VisitVar_stmt_base([NotNull] BRAQParser.Var_stmt_baseContext context);
+	Result VisitVar_stmt([NotNull] BRAQParser.Var_stmtContext context);
 	/// <summary>
-	/// Visit a parse tree produced by <see cref="BRAQParser.print_stmt_base"/>.
+	/// Visit a parse tree produced by <see cref="BRAQParser.expr_stmt"/>.
 	/// </summary>
 	/// <param name="context">The parse tree.</param>
 	/// <return>The visitor result.</return>
-	Result VisitPrint_stmt_base([NotNull] BRAQParser.Print_stmt_baseContext context);
-	/// <summary>
-	/// Visit a parse tree produced by <see cref="BRAQParser.assign_stmt_base"/>.
-	/// </summary>
-	/// <param name="context">The parse tree.</param>
-	/// <return>The visitor result.</return>
-	Result VisitAssign_stmt_base([NotNull] BRAQParser.Assign_stmt_baseContext context);
-	/// <summary>
-	/// Visit a parse tree produced by <see cref="BRAQParser.read_stmt_base"/>.
-	/// </summary>
-	/// <param name="context">The parse tree.</param>
-	/// <return>The visitor result.</return>
-	Result VisitRead_stmt_base([NotNull] BRAQParser.Read_stmt_baseContext context);
+	Result VisitExpr_stmt([NotNull] BRAQParser.Expr_stmtContext context);
 	/// <summary>
 	/// Visit a parse tree produced by <see cref="BRAQParser.expr"/>.
 	/// </summary>
@@ -86,11 +74,53 @@ public interface IBRAQParserVisitor<Result> : IParseTreeVisitor<Result> {
 	/// <return>The visitor result.</return>
 	Result VisitExpr([NotNull] BRAQParser.ExprContext context);
 	/// <summary>
-	/// Visit a parse tree produced by <see cref="BRAQParser.group"/>.
+	/// Visit a parse tree produced by <see cref="BRAQParser.assign"/>.
 	/// </summary>
 	/// <param name="context">The parse tree.</param>
 	/// <return>The visitor result.</return>
-	Result VisitGroup([NotNull] BRAQParser.GroupContext context);
+	Result VisitAssign([NotNull] BRAQParser.AssignContext context);
+	/// <summary>
+	/// Visit a parse tree produced by <see cref="BRAQParser.logical_or"/>.
+	/// </summary>
+	/// <param name="context">The parse tree.</param>
+	/// <return>The visitor result.</return>
+	Result VisitLogical_or([NotNull] BRAQParser.Logical_orContext context);
+	/// <summary>
+	/// Visit a parse tree produced by <see cref="BRAQParser.logical_xor"/>.
+	/// </summary>
+	/// <param name="context">The parse tree.</param>
+	/// <return>The visitor result.</return>
+	Result VisitLogical_xor([NotNull] BRAQParser.Logical_xorContext context);
+	/// <summary>
+	/// Visit a parse tree produced by <see cref="BRAQParser.logical_and"/>.
+	/// </summary>
+	/// <param name="context">The parse tree.</param>
+	/// <return>The visitor result.</return>
+	Result VisitLogical_and([NotNull] BRAQParser.Logical_andContext context);
+	/// <summary>
+	/// Visit a parse tree produced by <see cref="BRAQParser.logical_equal"/>.
+	/// </summary>
+	/// <param name="context">The parse tree.</param>
+	/// <return>The visitor result.</return>
+	Result VisitLogical_equal([NotNull] BRAQParser.Logical_equalContext context);
+	/// <summary>
+	/// Visit a parse tree produced by <see cref="BRAQParser.logical_gr_le"/>.
+	/// </summary>
+	/// <param name="context">The parse tree.</param>
+	/// <return>The visitor result.</return>
+	Result VisitLogical_gr_le([NotNull] BRAQParser.Logical_gr_leContext context);
+	/// <summary>
+	/// Visit a parse tree produced by <see cref="BRAQParser.addition"/>.
+	/// </summary>
+	/// <param name="context">The parse tree.</param>
+	/// <return>The visitor result.</return>
+	Result VisitAddition([NotNull] BRAQParser.AdditionContext context);
+	/// <summary>
+	/// Visit a parse tree produced by <see cref="BRAQParser.multiplication"/>.
+	/// </summary>
+	/// <param name="context">The parse tree.</param>
+	/// <return>The visitor result.</return>
+	Result VisitMultiplication([NotNull] BRAQParser.MultiplicationContext context);
 	/// <summary>
 	/// Visit a parse tree produced by <see cref="BRAQParser.call"/>.
 	/// </summary>
@@ -98,23 +128,23 @@ public interface IBRAQParserVisitor<Result> : IParseTreeVisitor<Result> {
 	/// <return>The visitor result.</return>
 	Result VisitCall([NotNull] BRAQParser.CallContext context);
 	/// <summary>
-	/// Visit a parse tree produced by <see cref="BRAQParser.call_or_literal"/>.
+	/// Visit a parse tree produced by <see cref="BRAQParser.short_call"/>.
 	/// </summary>
 	/// <param name="context">The parse tree.</param>
 	/// <return>The visitor result.</return>
-	Result VisitCall_or_literal([NotNull] BRAQParser.Call_or_literalContext context);
-	/// <summary>
-	/// Visit a parse tree produced by <see cref="BRAQParser.arg_list"/>.
-	/// </summary>
-	/// <param name="context">The parse tree.</param>
-	/// <return>The visitor result.</return>
-	Result VisitArg_list([NotNull] BRAQParser.Arg_listContext context);
+	Result VisitShort_call([NotNull] BRAQParser.Short_callContext context);
 	/// <summary>
 	/// Visit a parse tree produced by <see cref="BRAQParser.literal"/>.
 	/// </summary>
 	/// <param name="context">The parse tree.</param>
 	/// <return>The visitor result.</return>
 	Result VisitLiteral([NotNull] BRAQParser.LiteralContext context);
+	/// <summary>
+	/// Visit a parse tree produced by <see cref="BRAQParser.group"/>.
+	/// </summary>
+	/// <param name="context">The parse tree.</param>
+	/// <return>The visitor result.</return>
+	Result VisitGroup([NotNull] BRAQParser.GroupContext context);
 	/// <summary>
 	/// Visit a parse tree produced by <see cref="BRAQParser.var_node"/>.
 	/// </summary>

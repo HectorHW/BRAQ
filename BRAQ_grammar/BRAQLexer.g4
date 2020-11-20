@@ -40,8 +40,6 @@ NEWLINE: ('\n'|'\r')+ -> skip;
 SPACE: [ \t]+ -> skip;
 
 VAR: 'var';
-PRINT: 'print';
-READ: 'read';
 
 IF: 'if';
 ELSE: 'else';
