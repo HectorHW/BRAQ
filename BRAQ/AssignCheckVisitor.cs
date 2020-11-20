@@ -6,7 +6,7 @@ using Antlr4.Runtime.Misc;
 
 namespace BRAQ
 {
-    class AssignCheckVisitor : BRAQParserBaseVisitor<int> //ищем присваивания 
+    public class AssignCheckVisitor : BRAQParserBaseVisitor<int> //ищем присваивания 
     {
 
         public struct AssignCheckResult

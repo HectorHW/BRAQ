@@ -33,21 +33,22 @@ expr_stmt: expr SEMICOLON;
 //| left=expr op=XOR right=expr
 //;
 
-expr: assign;
+expr: containing=assign;
 
-assign: id_name=ID EQUALS assignee=logical_or | logical_or;
+assign: id_name=ID EQUALS assignee=logical_or | assignee=logical_or;
 
 
-logical_or: logical_or OR logical_xor | logical_xor;
-logical_xor: logical_xor XOR logical_and | logical_and;
-logical_and: logical_and AND logical_equal |  logical_equal;
-logical_equal: logical_equal op=(EQ|NE) logical_gr_le | logical_gr_le;
-logical_gr_le: addition op=(GR|GE|LS|LE) addition | addition;
-addition: addition op=(PLUS|MINUS) multiplication | multiplication;
-multiplication: multiplication op=(STAR|SLASH|MODULUS) (short_call | call | literal) | (short_call | call | literal);
+logical_or: left=logical_or op=OR right=logical_xor | right=logical_xor;
+logical_xor:  left=logical_xor op=XOR right=logical_and | right=logical_and;
+logical_and:  left=logical_and op=AND right=logical_equal |  right=logical_equal;
+logical_equal:  left=logical_equal op=(EQ|NE) right=logical_gr_le | right=logical_gr_le;
+logical_gr_le:  left=addition op=(GR|GE|LS|LE) right=addition | right=addition;
+addition:  left=addition op=(PLUS|MINUS) right=multiplication | right=multiplication;
+multiplication:  left=multiplication op=(STAR|SLASH|MODULUS) (right_short_call=short_call | right_call=call | right_literal=literal) 
+| (right_short_call=short_call | right_call=call | right_literal=literal);
 
 call: calee=ID LBRACKET expr* RBRACKET;
-short_call: calee=ID AT_OPERATOR (short_call|call|literal);
+short_call: calee=ID AT_OPERATOR (sc_arg=short_call|c_arg=call|l_arg=literal);
 
 
 

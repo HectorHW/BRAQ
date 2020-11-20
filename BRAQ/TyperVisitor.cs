@@ -10,7 +10,7 @@ using Antlr4.Runtime.Misc;
 namespace BRAQ
 {
     //TODO
-    public class TyperVisitor : BRAQParserBaseVisitor<Dictionary<ParserRuleContext, Type>>
+    public class TyperVisitor : BRAQParserBaseVisitor<Type>
     {
 
         class TypeHelper
@@ -40,9 +40,9 @@ namespace BRAQ
             }
         }
 
-        private Dictionary<ParserRuleContext, Type> dict;
+        private Dictionary<ParserRuleContext, Type> type_dict;
 
-        public Dictionary<IToken, MethodInfo> function_table = new Dictionary<IToken, MethodInfo>();
+        public Dictionary<IToken, MethodInfo> function_table;
         
         private List<TypeHelper> TypeAllowances;
         
@@ -53,38 +53,38 @@ namespace BRAQ
         //для каждого объявления найдём тип
         private Dictionary<BRAQParser.Var_stmtContext, Type> declaration_to_type;
 
+        private Dictionary<BRAQParser.Var_stmtContext, ParserRuleContext> declaration_to_assignment;
 
         public struct TyperResult
         {
-            public Dictionary<ParserRuleContext, Type> expr_type;
+            public Dictionary<ParserRuleContext, Type> expr_type; // including var_def
             public Dictionary<IToken, MethodInfo> outer_function_table;
             public Dictionary<IToken, MethodInfo> user_function_table; // yet unused
         }
         
         
 
-        public static TyperResult solveTypes(BRAQParser.ProgramContext context)
+        public static TyperResult solveTypes(BRAQParser.ProgramContext context, AssignCheckVisitor.AssignCheckResult result)
         {
-            //check that there are no unassigned variables
-            var assigners = AssignCheckVisitor.getAssigners(context);
-
-
             //make types
-            var visitor = new TyperVisitor(assigners);
+            var visitor = new TyperVisitor(result);
             context.Accept(visitor);
             var res = new TyperResult();
-            res.expr_type = visitor.dict;
+            res.expr_type = visitor.type_dict;
             res.outer_function_table = visitor.function_table;
             return res;
         }
         
         
-        private TyperVisitor(List<Pair<string, ParserRuleContext>> assigners)
+        private TyperVisitor(AssignCheckVisitor.AssignCheckResult assigners)
         {
-            //varname_type_dict = new Dictionary<string, Type>();
-            dict = new Dictionary<ParserRuleContext, Type>();
-            this.assigners = assigners;
-            varname_dict = new Dictionary<string, BRAQParser.Var_stmtContext>();
+            variable_to_declaration = assigners.token_to_def;
+            declaration_to_type = new Dictionary<BRAQParser.Var_stmtContext, Type>();
+            type_dict = new Dictionary<ParserRuleContext, Type>();
+            function_table = new Dictionary<IToken, MethodInfo>();
+            declaration_to_assignment = assigners.def_to_assign;
+            
+            
 
             TypeAllowances = File.ReadAllText("binary_typing.txt")
                 .Split(new[] {'\n', '\r'}, StringSplitOptions.RemoveEmptyEntries)
@@ -110,20 +110,12 @@ namespace BRAQ
 
         }
 
-
-        public override Dictionary<ParserRuleContext, Type> VisitProgram(BRAQParser.ProgramContext context)
+        public override Type VisitIf_stmt(BRAQParser.If_stmtContext context)
         {
-            base.VisitProgram(context);
-            return dict;
-        }
-
-        public override Dictionary<ParserRuleContext, Type> VisitIf_stmt(BRAQParser.If_stmtContext context)
-        {
-            context.cond.Accept(this);
-            if (dict[context.cond]!=typeof(bool))
+            if ( context.cond.Accept(this)!=typeof(bool))
             {
                 string msg =
-                    $"expected boolean type but got {dict[context.cond]} in if condition [Line {context.cond.Start.Line}]";
+                    $"expected boolean type but got {type_dict[context.cond]} in if condition [Line {context.cond.Start.Line}]";
                 Console.WriteLine(msg);
                 
                 throw new TypeMismatchError(msg);
@@ -136,133 +128,166 @@ namespace BRAQ
             return null;
         }
 
-        public override Dictionary<ParserRuleContext, Type> VisitVar_stmt(BRAQParser.Var_stmtContext context)
+        public override Type VisitVar_stmt(BRAQParser.Var_stmtContext context)
         {
             if (context.assignee != null)
             {
-                context.assignee.Accept(this);
-                varname_dict[context.id_name.Text] = context;
-                dict[context] = dict[context.assignee];
+                type_dict[context] = context.assignee.Accept(this);
+                declaration_to_type[context] = type_dict[context];
             }
             else
             {
-                var assigner = assigners.Where(x => x.a == context.id_name.Text).Single().b;
-                assigner.Accept(this);
-                varname_dict[context.id_name.Text] = context;
-                dict[context] = dict[assigner];
+                var assigner = declaration_to_assignment[context];
+                Type t = assigner.Accept(this);
+                type_dict[context] = t;
+                declaration_to_type[context] = t;
 
             }
             return null;
         }
 
-        public override Dictionary<ParserRuleContext, Type> VisitAssign(BRAQParser.AssignContext context)
+        public override Type VisitAssign(BRAQParser.AssignContext context)
         {
-            if ()
-            return null;
-        }
-
-        public override Dictionary<ParserRuleContext, Type> VisitLogical_or(BRAQParser.Logical_orContext context)
-        {
-            return null;
-        }
-
-        public override Dictionary<ParserRuleContext, Type> VisitLogical_xor(BRAQParser.Logical_xorContext context)
-        {
-            return null;
-        }
-
-        public override Dictionary<ParserRuleContext, Type> VisitLogical_and(BRAQParser.Logical_andContext context)
-        {
-            return null;
-        }
-
-        public override Dictionary<ParserRuleContext, Type> VisitLogical_equal(BRAQParser.Logical_equalContext context)
-        {
-            return null;
-        }
-
-        public override Dictionary<ParserRuleContext, Type> VisitLogical_gr_le(BRAQParser.Logical_gr_leContext context)
-        {
-            return null;
-        }
-
-        public override Dictionary<ParserRuleContext, Type> VisitAddition(BRAQParser.AdditionContext context)
-        {
-            return null;
-        }
-
-        public override Dictionary<ParserRuleContext, Type> VisitMultiplication(BRAQParser.MultiplicationContext context)
-        {
-            return null;
-        }
-
-        public override Dictionary<ParserRuleContext, Type> VisitShort_call(BRAQParser.Short_callContext context)
-        {
-            return null;
-        }
-
-        /*public override Dictionary<ParserRuleContext, Type> VisitVar_stmt_base(BRAQParser.Var_stmt_baseContext context)
-        {
-            if (context.assignee != null)
+            Type right_type = context.assignee.Accept(this);
+            if (context.id_name != null)
             {
-                context.assignee.Accept(this);
-                varname_dict[context.id_name.Text] = context;
-                dict[context] = dict[context.assignee];
+                Type target_type = declaration_to_type[variable_to_declaration[context.id_name]];
+                //check types
+                if (target_type != right_type)
+                {
+                    Console.WriteLine(
+                        $"type mismatch: assigned {right_type} to variable {context.id_name.Text} of type {target_type} [Line {context.id_name.Line}]");
+                    throw new TypeMismatchError();
+                }
+            }
+            return null;
+        }
+        #region boring_binary
+        public override Type VisitLogical_or(BRAQParser.Logical_orContext context)
+        {
+            return binary_optional_left_expr(context, context.left, context.op, context.right);
+        }
+
+        public override Type VisitLogical_xor(BRAQParser.Logical_xorContext context)
+        {
+            return binary_optional_left_expr(context, context.left, context.op, context.right);
+        }
+
+        public override Type VisitLogical_and(BRAQParser.Logical_andContext context)
+        {
+            return binary_optional_left_expr(context, context.left, context.op, context.right);
+        }
+
+        public override Type VisitLogical_equal(BRAQParser.Logical_equalContext context)
+        {
+            return binary_optional_left_expr(context, context.left, context.op, context.right);
+        }
+
+        public override Type VisitLogical_gr_le(BRAQParser.Logical_gr_leContext context)
+        {
+            return binary_optional_left_expr(context, context.left, context.op, context.right);
+        }
+
+        public override Type VisitAddition(BRAQParser.AdditionContext context)
+        {
+            return binary_optional_left_expr(context, context.left, context.op, context.right);
+        }
+        #endregion
+
+        public override Type VisitMultiplication(BRAQParser.MultiplicationContext context)
+        {
+            //right: right_short_call=short_call | right_call=call | right_literal=literal
+            if (context.right_short_call != null)
+            {
+                return binary_optional_left_expr(context, context.left, context.op, context.right_short_call);
+            }
+            if (context.right_call != null)
+            {
+                return binary_optional_left_expr(context, context.left, context.op, context.right_call);
+            }
+            if (context.right_literal != null)
+            {
+                return binary_optional_left_expr(context, context.left, context.op, context.right_literal);
+            }
+
+            throw new NotImplementedException();
+        }
+
+        public override Type VisitShort_call(BRAQParser.Short_callContext context)
+        {
+            //TODO user_defined functions
+            
+            //get argument type
+            Type argument_type;
+            if (context.c_arg != null)
+            {
+                argument_type = context.c_arg.Accept(this);
+            }else if (context.sc_arg != null)
+            {
+                argument_type = context.sc_arg.Accept(this);
+            }else if (context.l_arg != null)
+            {
+                argument_type = context.l_arg.Accept(this);
             }
             else
             {
-                var assigner = assigners.Where(x => x.a == context.id_name.Text).Single().b;
-                assigner.Accept(this);
-                varname_dict[context.id_name.Text] = context;
-                dict[context] = dict[assigner];
-
+                throw new NotImplementedException();
             }
-            return base.VisitVar_stmt_base(context);
-        }*/
+
+            Type[] types = {argument_type};
+            IToken function_token = context.calee;
+            
+            MethodInfo predef_function_info = PredefsHelper.Resolve(function_token.Text, types);
+            
+            if (predef_function_info != null)
+            {
+
+                if (predef_function_info.GetParameters()
+                    .Zip(types, (r, w) => new KeyValuePair<Type, Type>(r.ParameterType, w))
+                    .Any(p => p.Key != p.Value))
+                {
+                    Console.WriteLine("could not bind {0}({1}) [Line {2}]", 
+                        function_token.Text, 
+                        String.Join(" ", types.Select(x => x.ToString())),
+                        function_token.Line
+                    );
+                    throw new BindError();
+                }
+                
+                function_table[function_token] = predef_function_info;
+                type_dict[context] = predef_function_info.ReturnType;
+            }
+            else
+            {
+                Console.WriteLine(function_token.Text);
+                Console.WriteLine(String.Join(" ", types.ToList().Select(x => x.ToString())) );
+                throw new BindError();
+            }
+
+            return predef_function_info.ReturnType;
+            
+        }
         
-
-        public override Dictionary<ParserRuleContext, Type> VisitAssign_stmt_base(BRAQParser.Assign_stmt_baseContext context)
-        {
-            base.VisitAssign_stmt_base(context);
-            context.assignee.Accept(this);
-            if (dict[varname_dict[context.id_name.Text]] != dict[context.assignee])
-            {
-                string msg =
-                    $"assigning {dict[context.assignee]} to variable {context.id_name.Text} of type {dict[varname_dict[context.id_name.Text]]}";
-                Console.WriteLine(msg);
-                throw new TypeMismatchError();
-            }
-            dict[context] = dict[context.assignee];
-            return null;
-        }
-
-        public override Dictionary<ParserRuleContext, Type> VisitRead_stmt_base(BRAQParser.Read_stmt_baseContext context)
-        {
-            dict[context] = typeof(int);
-            
-            
-            return null;
-        }
-
-        public override Dictionary<ParserRuleContext, Type> VisitExpr(BRAQParser.ExprContext context)
+        
+        /*public override Dictionary<ParserRuleContext, Type> VisitExpr(BRAQParser.ExprContext context)
         {
             if (context.grouping != null)
             {
                 context.grouping.Accept(this);
-                dict[context] = dict[context.grouping];
+                type_dict[context] = type_dict[context.grouping];
             }else if (context.num != null)
             {
                 context.num.Accept(this);
-                dict[context] = dict[context.num];
+                type_dict[context] = type_dict[context.num];
             }else if (context.call_exr!=null)
             {
                 context.call_exr.Accept(this);
-                dict[context] = dict[context.call_exr];
+                type_dict[context] = type_dict[context.call_exr];
             }
             else if (context.unary_not_op != null)
             {
                 context.right.Accept(this);
-                var right_type = dict[context.right];
+                var right_type = type_dict[context.right];
                 try
                 {
                     Console.WriteLine(context.unary_not_op.Text);
@@ -271,7 +296,7 @@ namespace BRAQ
                     var type_pair = TypeAllowances
                         .Find(x => 
                             x.Equals(new TypeHelper(null, right_type, context.unary_not_op.Text, null)));
-                    dict[context] = type_pair.result;
+                    type_dict[context] = type_pair.result;
                     Console.WriteLine(type_pair.result);
                 }
                 catch(ArgumentNullException )
@@ -285,8 +310,8 @@ namespace BRAQ
             {
                 context.left.Accept(this);
                 context.right.Accept(this);
-                var left_type = dict[context.left];
-                var right_type = dict[context.right];
+                var left_type = type_dict[context.left];
+                var right_type = type_dict[context.right];
 
                 if (left_type != right_type)
                 {
@@ -302,7 +327,7 @@ namespace BRAQ
                     var type_pair = TypeAllowances
                         .Find(x => 
                             x.Equals(new TypeHelper(left_type, right_type, context.op.Text, null)));
-                    dict[context] = type_pair.result;
+                    type_dict[context] = type_pair.result;
                     Console.WriteLine(type_pair.result);
                 }
                 catch(ArgumentNullException )
@@ -316,51 +341,29 @@ namespace BRAQ
 
             return null;
         }
+        */
 
-        public override Dictionary<ParserRuleContext, Type> VisitGroup(BRAQParser.GroupContext context)
+        public override Type VisitGroup(BRAQParser.GroupContext context)
         {
             context.containing.Accept(this);
-            dict[context] = dict[context.containing];
+            type_dict[context] = type_dict[context.containing];
             return null;
         }
-
-        public override Dictionary<ParserRuleContext, Type> VisitCall_or_literal(BRAQParser.Call_or_literalContext context)
-        {
-            if (context.containing_call != null)
-            {
-                context.containing_call.Accept(this);
-                dict[context] = dict[context.containing_call];
-            }
-            else
-            {
-                context.containing_literal.Accept(this);
-                dict[context] = dict[context.containing_literal];
-            }
-            return null;
-        }
-
-        public override Dictionary<ParserRuleContext, Type> VisitCall(BRAQParser.CallContext context)
+        
+        public override Type VisitCall(BRAQParser.CallContext context)
         {
             //TODO
             //get argument list
-            Type[] types;
-            if (context.single_argument != null)
-            {
-                context.single_argument.Accept(this);
-                types = new[] { dict[context.single_argument]};
-            }
-            else
-            {
 
+            Console.WriteLine(context.expr().Length);
                 
-                
-                foreach (var exprContext in context.multiple_arguments.expr())
-                {
-                    exprContext.Accept(this);
-                }
-
-                types = context.multiple_arguments.expr().Select(x => dict[x]).ToArray();
+            foreach (var exprContext in context.expr())
+            {
+                exprContext.Accept(this);
             }
+
+            Type[] types = context.expr().Select(x => type_dict[x]).ToArray();
+            
 
             IToken function_token = context.calee;
 
@@ -385,62 +388,96 @@ namespace BRAQ
                 }
                 
                 function_table[function_token] = predef_function_info;
-                dict[context] = predef_function_info.ReturnType;
+                type_dict[context] = predef_function_info.ReturnType;
+                return predef_function_info.ReturnType;
             }
-            else
-            {
-                Console.WriteLine(function_token.Text);
-                Console.WriteLine(String.Join(" ", types.ToList().Select(x => x.ToString())) );
-                throw new BindError();
-            }
-            
-            return null;
-        }
 
-        
-        public override Dictionary<ParserRuleContext, Type> VisitArg_list(BRAQParser.Arg_listContext context)
-        {
-            foreach (var s in context.expr())
-            {
-                s.Accept(this);
-            }
-            
-            return null;
+            Console.WriteLine(function_token.Text);
+            Console.WriteLine(String.Join(" ", types.ToList().Select(x => x.ToString())) );
+            throw new BindError();
         }
         
+        
 
-        public override Dictionary<ParserRuleContext, Type> VisitLiteral(BRAQParser.LiteralContext context)
+        public override Type VisitLiteral(BRAQParser.LiteralContext context)
         {
             if (context.num != null)
             {
-                dict[context] = typeof(int);
-            }
-            else if (context.str != null)
-            {
-                dict[context] = typeof(string);
-            }
-            
-            else if (context.var_node_!=null)
-            {
-                context.var_node_.Accept(this);
-                dict[context] = dict[context.var_node_];
-            }
-            else if (context.double_num != null)
-            {
-                dict[context] = typeof(double);
+                return type_dict[context] = typeof(int);
             }
 
-            return null;
+            if (context.str != null)
+            {
+                return type_dict[context] = typeof(string);
+            }
+
+            if (context.var_node_!=null)
+            {
+                
+               return type_dict[context] = context.var_node_.Accept(this);
+            }
+
+            if (context.double_num != null)
+            {
+                return type_dict[context] = typeof(double);
+            }
+
+            throw new NotImplementedException();
         }
 
-        public override Dictionary<ParserRuleContext, Type> VisitVar_node(BRAQParser.Var_nodeContext context)
+        public override Type VisitVar_node(BRAQParser.Var_nodeContext context)
         {
-            string var_name = context.id_name.Text;
-            var assigner = assigners.Find(x => x.a == var_name).b;
-            assigner.Accept(this);
-            dict[context] = dict[assigner];
+            var def_point = variable_to_declaration[context.id_name];
+            Type t = declaration_to_type[def_point];
+            type_dict[context] = t;
+            return t;
+        }
 
-            return null;
+
+        private Type get_binary_operator_result(Type left_type, Type right_type, IToken op)
+        {
+            if (left_type != right_type)
+            {
+                string msg = $"different left and right types: {left_type} {right_type} for operator {op.Text} [Line {op.Line}]";
+                Console.WriteLine(msg);
+                throw new TypeMismatchError(msg);
+            }
+            try
+            {
+                Console.WriteLine(left_type);
+                Console.WriteLine(op.Text);
+                Console.WriteLine(right_type);
+                var type_pair = TypeAllowances
+                    .Find(x => 
+                        x.Equals(new TypeHelper(left_type, right_type, op.Text, null)));
+                Console.WriteLine(type_pair.result);
+                return type_pair.result;
+            }
+            catch(ArgumentNullException )
+            {
+                string msg =
+                    $"Failed to find operator {op.Text} for types {left_type} {right_type} [Line {op.Line}]";
+                Console.WriteLine(msg);
+                throw new TypeMismatchError(msg);
+            }
+        }
+
+        private Type binary_optional_left_expr(ParserRuleContext context, ParserRuleContext left, IToken op, ParserRuleContext right)
+        {
+            if (left == null)
+            {
+                Type t = right.Accept(this);
+                type_dict[context] = t;
+                return t;
+            }
+
+            Type left_type = left.Accept(this);
+            Type right_type = right.Accept(this);
+            Type resulting_type = get_binary_operator_result(left_type, right_type, op);
+
+            type_dict[context] = resulting_type;
+            return resulting_type;
+
         }
     }
 

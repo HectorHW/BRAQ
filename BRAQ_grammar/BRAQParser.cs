@@ -487,6 +487,7 @@ public partial class BRAQParser : Parser {
 	}
 
 	public partial class ExprContext : ParserRuleContext {
+		public AssignContext containing;
 		public AssignContext assign() {
 			return GetRuleContext<AssignContext>(0);
 		}
@@ -517,7 +518,7 @@ public partial class BRAQParser : Parser {
 		try {
 			EnterOuterAlt(_localctx, 1);
 			{
-			State = 80; assign();
+			State = 80; _localctx.containing = assign();
 			}
 		}
 		catch (RecognitionException re) {
@@ -578,7 +579,7 @@ public partial class BRAQParser : Parser {
 			case 2:
 				EnterOuterAlt(_localctx, 2);
 				{
-				State = 85; logical_or(0);
+				State = 85; _localctx.assignee = logical_or(0);
 				}
 				break;
 			}
@@ -595,6 +596,9 @@ public partial class BRAQParser : Parser {
 	}
 
 	public partial class Logical_orContext : ParserRuleContext {
+		public Logical_orContext left;
+		public Logical_xorContext right;
+		public IToken op;
 		public Logical_xorContext logical_xor() {
 			return GetRuleContext<Logical_xorContext>(0);
 		}
@@ -639,7 +643,7 @@ public partial class BRAQParser : Parser {
 			EnterOuterAlt(_localctx, 1);
 			{
 			{
-			State = 89; logical_xor(0);
+			State = 89; _localctx.right = logical_xor(0);
 			}
 			Context.Stop = TokenStream.LT(-1);
 			State = 96;
@@ -653,11 +657,12 @@ public partial class BRAQParser : Parser {
 					{
 					{
 					_localctx = new Logical_orContext(_parentctx, _parentState);
+					_localctx.left = _prevctx;
 					PushNewRecursionContext(_localctx, _startState, RULE_logical_or);
 					State = 91;
 					if (!(Precpred(Context, 2))) throw new FailedPredicateException(this, "Precpred(Context, 2)");
-					State = 92; Match(OR);
-					State = 93; logical_xor(0);
+					State = 92; _localctx.op = Match(OR);
+					State = 93; _localctx.right = logical_xor(0);
 					}
 					} 
 				}
@@ -679,6 +684,9 @@ public partial class BRAQParser : Parser {
 	}
 
 	public partial class Logical_xorContext : ParserRuleContext {
+		public Logical_xorContext left;
+		public Logical_andContext right;
+		public IToken op;
 		public Logical_andContext logical_and() {
 			return GetRuleContext<Logical_andContext>(0);
 		}
@@ -723,7 +731,7 @@ public partial class BRAQParser : Parser {
 			EnterOuterAlt(_localctx, 1);
 			{
 			{
-			State = 100; logical_and(0);
+			State = 100; _localctx.right = logical_and(0);
 			}
 			Context.Stop = TokenStream.LT(-1);
 			State = 107;
@@ -737,11 +745,12 @@ public partial class BRAQParser : Parser {
 					{
 					{
 					_localctx = new Logical_xorContext(_parentctx, _parentState);
+					_localctx.left = _prevctx;
 					PushNewRecursionContext(_localctx, _startState, RULE_logical_xor);
 					State = 102;
 					if (!(Precpred(Context, 2))) throw new FailedPredicateException(this, "Precpred(Context, 2)");
-					State = 103; Match(XOR);
-					State = 104; logical_and(0);
+					State = 103; _localctx.op = Match(XOR);
+					State = 104; _localctx.right = logical_and(0);
 					}
 					} 
 				}
@@ -763,6 +772,9 @@ public partial class BRAQParser : Parser {
 	}
 
 	public partial class Logical_andContext : ParserRuleContext {
+		public Logical_andContext left;
+		public Logical_equalContext right;
+		public IToken op;
 		public Logical_equalContext logical_equal() {
 			return GetRuleContext<Logical_equalContext>(0);
 		}
@@ -807,7 +819,7 @@ public partial class BRAQParser : Parser {
 			EnterOuterAlt(_localctx, 1);
 			{
 			{
-			State = 111; logical_equal(0);
+			State = 111; _localctx.right = logical_equal(0);
 			}
 			Context.Stop = TokenStream.LT(-1);
 			State = 118;
@@ -821,11 +833,12 @@ public partial class BRAQParser : Parser {
 					{
 					{
 					_localctx = new Logical_andContext(_parentctx, _parentState);
+					_localctx.left = _prevctx;
 					PushNewRecursionContext(_localctx, _startState, RULE_logical_and);
 					State = 113;
 					if (!(Precpred(Context, 2))) throw new FailedPredicateException(this, "Precpred(Context, 2)");
-					State = 114; Match(AND);
-					State = 115; logical_equal(0);
+					State = 114; _localctx.op = Match(AND);
+					State = 115; _localctx.right = logical_equal(0);
 					}
 					} 
 				}
@@ -847,6 +860,8 @@ public partial class BRAQParser : Parser {
 	}
 
 	public partial class Logical_equalContext : ParserRuleContext {
+		public Logical_equalContext left;
+		public Logical_gr_leContext right;
 		public IToken op;
 		public Logical_gr_leContext logical_gr_le() {
 			return GetRuleContext<Logical_gr_leContext>(0);
@@ -894,7 +909,7 @@ public partial class BRAQParser : Parser {
 			EnterOuterAlt(_localctx, 1);
 			{
 			{
-			State = 122; logical_gr_le();
+			State = 122; _localctx.right = logical_gr_le();
 			}
 			Context.Stop = TokenStream.LT(-1);
 			State = 129;
@@ -908,6 +923,7 @@ public partial class BRAQParser : Parser {
 					{
 					{
 					_localctx = new Logical_equalContext(_parentctx, _parentState);
+					_localctx.left = _prevctx;
 					PushNewRecursionContext(_localctx, _startState, RULE_logical_equal);
 					State = 124;
 					if (!(Precpred(Context, 2))) throw new FailedPredicateException(this, "Precpred(Context, 2)");
@@ -921,7 +937,7 @@ public partial class BRAQParser : Parser {
 						ErrorHandler.ReportMatch(this);
 					    Consume();
 					}
-					State = 126; logical_gr_le();
+					State = 126; _localctx.right = logical_gr_le();
 					}
 					} 
 				}
@@ -943,7 +959,9 @@ public partial class BRAQParser : Parser {
 	}
 
 	public partial class Logical_gr_leContext : ParserRuleContext {
+		public AdditionContext left;
 		public IToken op;
+		public AdditionContext right;
 		public AdditionContext[] addition() {
 			return GetRuleContexts<AdditionContext>();
 		}
@@ -986,7 +1004,7 @@ public partial class BRAQParser : Parser {
 			case 1:
 				EnterOuterAlt(_localctx, 1);
 				{
-				State = 132; addition(0);
+				State = 132; _localctx.left = addition(0);
 				State = 133;
 				_localctx.op = TokenStream.LT(1);
 				_la = TokenStream.LA(1);
@@ -997,13 +1015,13 @@ public partial class BRAQParser : Parser {
 					ErrorHandler.ReportMatch(this);
 				    Consume();
 				}
-				State = 134; addition(0);
+				State = 134; _localctx.right = addition(0);
 				}
 				break;
 			case 2:
 				EnterOuterAlt(_localctx, 2);
 				{
-				State = 136; addition(0);
+				State = 136; _localctx.right = addition(0);
 				}
 				break;
 			}
@@ -1020,6 +1038,8 @@ public partial class BRAQParser : Parser {
 	}
 
 	public partial class AdditionContext : ParserRuleContext {
+		public AdditionContext left;
+		public MultiplicationContext right;
 		public IToken op;
 		public MultiplicationContext multiplication() {
 			return GetRuleContext<MultiplicationContext>(0);
@@ -1067,7 +1087,7 @@ public partial class BRAQParser : Parser {
 			EnterOuterAlt(_localctx, 1);
 			{
 			{
-			State = 140; multiplication(0);
+			State = 140; _localctx.right = multiplication(0);
 			}
 			Context.Stop = TokenStream.LT(-1);
 			State = 147;
@@ -1081,6 +1101,7 @@ public partial class BRAQParser : Parser {
 					{
 					{
 					_localctx = new AdditionContext(_parentctx, _parentState);
+					_localctx.left = _prevctx;
 					PushNewRecursionContext(_localctx, _startState, RULE_addition);
 					State = 142;
 					if (!(Precpred(Context, 2))) throw new FailedPredicateException(this, "Precpred(Context, 2)");
@@ -1094,7 +1115,7 @@ public partial class BRAQParser : Parser {
 						ErrorHandler.ReportMatch(this);
 					    Consume();
 					}
-					State = 144; multiplication(0);
+					State = 144; _localctx.right = multiplication(0);
 					}
 					} 
 				}
@@ -1116,6 +1137,10 @@ public partial class BRAQParser : Parser {
 	}
 
 	public partial class MultiplicationContext : ParserRuleContext {
+		public MultiplicationContext left;
+		public Short_callContext right_short_call;
+		public CallContext right_call;
+		public LiteralContext right_literal;
 		public IToken op;
 		public Short_callContext short_call() {
 			return GetRuleContext<Short_callContext>(0);
@@ -1175,17 +1200,17 @@ public partial class BRAQParser : Parser {
 			switch ( Interpreter.AdaptivePredict(TokenStream,12,Context) ) {
 			case 1:
 				{
-				State = 151; short_call();
+				State = 151; _localctx.right_short_call = short_call();
 				}
 				break;
 			case 2:
 				{
-				State = 152; call();
+				State = 152; _localctx.right_call = call();
 				}
 				break;
 			case 3:
 				{
-				State = 153; literal();
+				State = 153; _localctx.right_literal = literal();
 				}
 				break;
 			}
@@ -1202,6 +1227,7 @@ public partial class BRAQParser : Parser {
 					{
 					{
 					_localctx = new MultiplicationContext(_parentctx, _parentState);
+					_localctx.left = _prevctx;
 					PushNewRecursionContext(_localctx, _startState, RULE_multiplication);
 					State = 156;
 					if (!(Precpred(Context, 2))) throw new FailedPredicateException(this, "Precpred(Context, 2)");
@@ -1220,17 +1246,17 @@ public partial class BRAQParser : Parser {
 					switch ( Interpreter.AdaptivePredict(TokenStream,13,Context) ) {
 					case 1:
 						{
-						State = 158; short_call();
+						State = 158; _localctx.right_short_call = short_call();
 						}
 						break;
 					case 2:
 						{
-						State = 159; call();
+						State = 159; _localctx.right_call = call();
 						}
 						break;
 					case 3:
 						{
-						State = 160; literal();
+						State = 160; _localctx.right_literal = literal();
 						}
 						break;
 					}
@@ -1324,6 +1350,9 @@ public partial class BRAQParser : Parser {
 
 	public partial class Short_callContext : ParserRuleContext {
 		public IToken calee;
+		public Short_callContext sc_arg;
+		public CallContext c_arg;
+		public LiteralContext l_arg;
 		public ITerminalNode AT_OPERATOR() { return GetToken(BRAQParser.AT_OPERATOR, 0); }
 		public ITerminalNode ID() { return GetToken(BRAQParser.ID, 0); }
 		public Short_callContext short_call() {
@@ -1369,17 +1398,17 @@ public partial class BRAQParser : Parser {
 			switch ( Interpreter.AdaptivePredict(TokenStream,16,Context) ) {
 			case 1:
 				{
-				State = 180; short_call();
+				State = 180; _localctx.sc_arg = short_call();
 				}
 				break;
 			case 2:
 				{
-				State = 181; call();
+				State = 181; _localctx.c_arg = call();
 				}
 				break;
 			case 3:
 				{
-				State = 182; literal();
+				State = 182; _localctx.l_arg = literal();
 				}
 				break;
 			}

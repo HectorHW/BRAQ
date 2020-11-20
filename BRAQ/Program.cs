@@ -37,6 +37,8 @@ namespace BRAQ
         
             var ast = parser.program();
             
+            /*
+            
             var dict_arr_pair = ast.Accept(new VariableResolverVisitor());
 
             Dictionary<IToken, BRAQParser.Var_stmtContext> mention_to_def = dict_arr_pair.a;
@@ -52,11 +54,14 @@ namespace BRAQ
 
                 Console.WriteLine("{0} {1} {2} : {3}", t.Text, t.Line, t.Column, id);
             }
+            */
 
-            var solving = TyperVisitor.solveTypes(ast);
+            var assigningResults = AssignCheckVisitor.getAssigners(ast);
+            
+            var typerResult = TyperVisitor.solveTypes(ast, assigningResults);
 
-            var type_dict = solving.a;
-            Dictionary<IToken, MethodInfo> function_table = solving.b;
+            //var type_dict = solving.a;
+            //Dictionary<IToken, MethodInfo> function_table = solving.b;
             
             /*
             foreach (var keyValuePair in type_dict)
@@ -91,7 +96,7 @@ namespace BRAQ
 
             ILGenerator il = main.GetILGenerator();
 
-            ILVisitor visitor = new ILVisitor(il, mention_to_def, var_list, type_dict, function_table);
+            ILVisitor visitor = new ILVisitor(il, assigningResults, typerResult);
 
             ast.Accept(visitor);
 
