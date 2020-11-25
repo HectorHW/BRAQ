@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Globalization;
 using System.Linq;
 using System.Reflection;
@@ -17,6 +18,11 @@ namespace BRAQ
         private Dictionary<ParserRuleContext, Type> type_dict;
 
         private Dictionary<IToken, MethodInfo> function_table;
+
+        
+        //for break&continue generation
+        private Label? loop_begin = null;
+        private Label? loop_end = null;
 
         public ILVisitor(ILGenerator il, 
             //Dictionary<IToken, BRAQParser.Var_stmt_baseContext> dict, 
@@ -83,10 +89,19 @@ namespace BRAQ
                 il.Emit(OpCodes.Ldc_R8, double.Parse(context.double_num.Text, new CultureInfo("en-us")));
             }
             
-            else
+            else if (context.var_node_!=null)
             {
                 context.var_node_.Accept(this); //variable
             }
+            else if (context.containing_group != null)
+            {
+                context.containing_group.Accept(this);
+            }
+            else
+            {
+                throw new NotImplementedException();
+            }
+
             return 0;
         }
 
@@ -95,9 +110,17 @@ namespace BRAQ
             
             //сгенерируем условие
             Label beforeCond = il.DefineLabel();
+            
+            var prev_loop_begin = loop_begin;
+            var prev_loop_end = loop_end;
+            
             il.MarkLabel(beforeCond); //точка перед условием
             
             Label after_loop_body = il.DefineLabel();
+            
+            loop_begin = beforeCond;
+            loop_end = after_loop_body;
+            
             if (context.cond != null){ // возможно сгенерируем условие
                 context.cond.Accept(this); 
                 il.Emit(OpCodes.Brfalse_S, after_loop_body);
@@ -107,6 +130,10 @@ namespace BRAQ
             context.body.Accept(this);
             il.Emit(OpCodes.Br_S ,beforeCond); // прыгаем к проверке условий
             il.MarkLabel(after_loop_body); //точка выхода
+
+            loop_begin = prev_loop_begin;
+            loop_end = prev_loop_end;
+            
             return 0;
         }
 
@@ -115,6 +142,20 @@ namespace BRAQ
             BRAQParser.Var_stmtContext declaration_point = variable_to_declaration[context.id_name];
             int var_id = Array.IndexOf(_varList, declaration_point);
             il.Emit(OpCodes.Ldloc, var_id);
+            return 0;
+        }
+
+        public override int VisitBreak_stmt(BRAQParser.Break_stmtContext context)
+        {
+            Debug.Assert(loop_end != null); //always true bc of checks
+            il.Emit(OpCodes.Br_S, loop_end.Value); 
+            return 0;
+        }
+
+        public override int VisitContinue_stmt(BRAQParser.Continue_stmtContext context)
+        {
+            Debug.Assert(loop_begin != null); //always true bc of checks
+            il.Emit(OpCodes.Br_S, loop_begin.Value); 
             return 0;
         }
 

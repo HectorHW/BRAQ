@@ -389,6 +389,11 @@ namespace BRAQ
                 return type_dict[context] = typeof(double);
             }
 
+            if (context.containing_group != null)
+            {
+                return type_dict[context] = context.containing_group.Accept(this);
+            }
+
             throw new NotImplementedException();
         }
 

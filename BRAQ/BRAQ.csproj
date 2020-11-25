@@ -43,6 +43,8 @@
     </ItemGroup>
     <ItemGroup>
         <Compile Include="AssignCheckVisitor.cs" />
+        <Compile Include="Checkers\BreakContinueChecker.cs" />
+        <Compile Include="Checkers\CheckExecutor.cs" />
         <Compile Include="ILVisitor.cs" />
         <Compile Include="Program.cs" />
         <Compile Include="Properties\AssemblyInfo.cs" />

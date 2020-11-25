@@ -95,6 +95,30 @@ public partial class BRAQParserBaseListener : IBRAQParserListener {
 	/// <param name="context">The parse tree.</param>
 	public virtual void ExitWhile_loop_stmt([NotNull] BRAQParser.While_loop_stmtContext context) { }
 	/// <summary>
+	/// Enter a parse tree produced by <see cref="BRAQParser.break_stmt"/>.
+	/// <para>The default implementation does nothing.</para>
+	/// </summary>
+	/// <param name="context">The parse tree.</param>
+	public virtual void EnterBreak_stmt([NotNull] BRAQParser.Break_stmtContext context) { }
+	/// <summary>
+	/// Exit a parse tree produced by <see cref="BRAQParser.break_stmt"/>.
+	/// <para>The default implementation does nothing.</para>
+	/// </summary>
+	/// <param name="context">The parse tree.</param>
+	public virtual void ExitBreak_stmt([NotNull] BRAQParser.Break_stmtContext context) { }
+	/// <summary>
+	/// Enter a parse tree produced by <see cref="BRAQParser.continue_stmt"/>.
+	/// <para>The default implementation does nothing.</para>
+	/// </summary>
+	/// <param name="context">The parse tree.</param>
+	public virtual void EnterContinue_stmt([NotNull] BRAQParser.Continue_stmtContext context) { }
+	/// <summary>
+	/// Exit a parse tree produced by <see cref="BRAQParser.continue_stmt"/>.
+	/// <para>The default implementation does nothing.</para>
+	/// </summary>
+	/// <param name="context">The parse tree.</param>
+	public virtual void ExitContinue_stmt([NotNull] BRAQParser.Continue_stmtContext context) { }
+	/// <summary>
 	/// Enter a parse tree produced by <see cref="BRAQParser.var_stmt"/>.
 	/// <para>The default implementation does nothing.</para>
 	/// </summary>

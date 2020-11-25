@@ -81,6 +81,26 @@ public interface IBRAQParserListener : IParseTreeListener {
 	/// <param name="context">The parse tree.</param>
 	void ExitWhile_loop_stmt([NotNull] BRAQParser.While_loop_stmtContext context);
 	/// <summary>
+	/// Enter a parse tree produced by <see cref="BRAQParser.break_stmt"/>.
+	/// </summary>
+	/// <param name="context">The parse tree.</param>
+	void EnterBreak_stmt([NotNull] BRAQParser.Break_stmtContext context);
+	/// <summary>
+	/// Exit a parse tree produced by <see cref="BRAQParser.break_stmt"/>.
+	/// </summary>
+	/// <param name="context">The parse tree.</param>
+	void ExitBreak_stmt([NotNull] BRAQParser.Break_stmtContext context);
+	/// <summary>
+	/// Enter a parse tree produced by <see cref="BRAQParser.continue_stmt"/>.
+	/// </summary>
+	/// <param name="context">The parse tree.</param>
+	void EnterContinue_stmt([NotNull] BRAQParser.Continue_stmtContext context);
+	/// <summary>
+	/// Exit a parse tree produced by <see cref="BRAQParser.continue_stmt"/>.
+	/// </summary>
+	/// <param name="context">The parse tree.</param>
+	void ExitContinue_stmt([NotNull] BRAQParser.Continue_stmtContext context);
+	/// <summary>
 	/// Enter a parse tree produced by <see cref="BRAQParser.var_stmt"/>.
 	/// </summary>
 	/// <param name="context">The parse tree.</param>

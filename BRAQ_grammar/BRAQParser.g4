@@ -9,10 +9,15 @@ block: LCURLY containing=stmt* RCURLY | single_stmt=stmt;
 stmt: var_stmt
 | expr_stmt
 | containing_if=if_stmt
-| while_loop_stmt;
+| while_loop_stmt
+| break_stmt
+| continue_stmt;
 
 if_stmt: IF cond=expr then_branch=block (ELSE else_branch=block)?;
 while_loop_stmt: WHILE (cond=logical_or)? body=block;
+
+break_stmt: BREAK SEMICOLON;
+continue_stmt: CONTINUE SEMICOLON;
 
 // ID @ (params?) = expr
 var_stmt: VAR id_name=ID (EQUALS assignee=expr)? SEMICOLON;
@@ -56,7 +61,7 @@ short_call: calee=ID AT_OPERATOR (sc_arg=short_call|c_arg=call|l_arg=literal);
 
 
 
-literal: num=NUMBER| double_num=DOUBLE_NUMBER|var_node_=var_node|str=STRING | group;
+literal: num=NUMBER| double_num=DOUBLE_NUMBER|var_node_=var_node|str=STRING | containing_group=group;
 
 group: LBRACKET containing=expr RBRACKET;
 

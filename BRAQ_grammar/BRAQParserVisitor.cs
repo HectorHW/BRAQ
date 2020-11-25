@@ -62,6 +62,18 @@ public interface IBRAQParserVisitor<Result> : IParseTreeVisitor<Result> {
 	/// <return>The visitor result.</return>
 	Result VisitWhile_loop_stmt([NotNull] BRAQParser.While_loop_stmtContext context);
 	/// <summary>
+	/// Visit a parse tree produced by <see cref="BRAQParser.break_stmt"/>.
+	/// </summary>
+	/// <param name="context">The parse tree.</param>
+	/// <return>The visitor result.</return>
+	Result VisitBreak_stmt([NotNull] BRAQParser.Break_stmtContext context);
+	/// <summary>
+	/// Visit a parse tree produced by <see cref="BRAQParser.continue_stmt"/>.
+	/// </summary>
+	/// <param name="context">The parse tree.</param>
+	/// <return>The visitor result.</return>
+	Result VisitContinue_stmt([NotNull] BRAQParser.Continue_stmtContext context);
+	/// <summary>
 	/// Visit a parse tree produced by <see cref="BRAQParser.var_stmt"/>.
 	/// </summary>
 	/// <param name="context">The parse tree.</param>

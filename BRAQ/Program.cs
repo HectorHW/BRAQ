@@ -5,6 +5,7 @@ using System.Linq;
 using System.Reflection;
 using System.Reflection.Emit;
 using Antlr4.Runtime.Misc;
+using BRAQ.Checkers;
 
 namespace BRAQ
 {
@@ -76,6 +77,10 @@ namespace BRAQ
 
             Console.WriteLine("solved types and functions");
 
+            //checks
+            
+            CheckExecutor.runChecks(ast);
+            
             //compiling
             
             AppDomain domain = AppDomain.CurrentDomain;
