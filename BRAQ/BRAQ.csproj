@@ -47,7 +47,6 @@
         <Compile Include="Program.cs" />
         <Compile Include="Properties\AssemblyInfo.cs" />
         <Compile Include="TyperVisitor.cs" />
-        <Compile Include="VariableResolverVisitor.cs" />
     </ItemGroup>
     <ItemGroup>
       <ProjectReference Include="..\BRAQStd\BRAQStd.csproj">

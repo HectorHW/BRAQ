@@ -1,6 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
+using System.Runtime.CompilerServices;
 using Antlr4.Runtime;
 using Antlr4.Runtime.Misc;
 
@@ -70,6 +72,8 @@ namespace BRAQ
                 assigned[context] = true;
                 assigners[context] = context.assignee;
             }
+
+            declaration[context.id_name] = context;
             return 0;
         }
 
@@ -97,7 +101,8 @@ namespace BRAQ
 
         public override int VisitAssign(BRAQParser.AssignContext context)
         {
-            if (context.id_name==null) return 0;
+            context.assignee.Accept(this);
+            if (context.id_name == null) return 0;
             
             if (!scope.ContainsKey(context.id_name.Text))
             {
@@ -105,7 +110,7 @@ namespace BRAQ
                 throw new UnknownVariableException();
             }
             var var_definition_point = scope[context.id_name.Text];
-
+            declaration[context.id_name] = var_definition_point;
             if (!assigned[var_definition_point])
             {
                 assigners[var_definition_point] = context.assignee;
