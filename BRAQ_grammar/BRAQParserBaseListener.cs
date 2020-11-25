@@ -83,6 +83,18 @@ public partial class BRAQParserBaseListener : IBRAQParserListener {
 	/// <param name="context">The parse tree.</param>
 	public virtual void ExitIf_stmt([NotNull] BRAQParser.If_stmtContext context) { }
 	/// <summary>
+	/// Enter a parse tree produced by <see cref="BRAQParser.while_loop_stmt"/>.
+	/// <para>The default implementation does nothing.</para>
+	/// </summary>
+	/// <param name="context">The parse tree.</param>
+	public virtual void EnterWhile_loop_stmt([NotNull] BRAQParser.While_loop_stmtContext context) { }
+	/// <summary>
+	/// Exit a parse tree produced by <see cref="BRAQParser.while_loop_stmt"/>.
+	/// <para>The default implementation does nothing.</para>
+	/// </summary>
+	/// <param name="context">The parse tree.</param>
+	public virtual void ExitWhile_loop_stmt([NotNull] BRAQParser.While_loop_stmtContext context) { }
+	/// <summary>
 	/// Enter a parse tree produced by <see cref="BRAQParser.var_stmt"/>.
 	/// <para>The default implementation does nothing.</para>
 	/// </summary>
@@ -107,18 +119,6 @@ public partial class BRAQParserBaseListener : IBRAQParserListener {
 	/// <param name="context">The parse tree.</param>
 	public virtual void ExitExpr_stmt([NotNull] BRAQParser.Expr_stmtContext context) { }
 	/// <summary>
-	/// Enter a parse tree produced by <see cref="BRAQParser.expr"/>.
-	/// <para>The default implementation does nothing.</para>
-	/// </summary>
-	/// <param name="context">The parse tree.</param>
-	public virtual void EnterExpr([NotNull] BRAQParser.ExprContext context) { }
-	/// <summary>
-	/// Exit a parse tree produced by <see cref="BRAQParser.expr"/>.
-	/// <para>The default implementation does nothing.</para>
-	/// </summary>
-	/// <param name="context">The parse tree.</param>
-	public virtual void ExitExpr([NotNull] BRAQParser.ExprContext context) { }
-	/// <summary>
 	/// Enter a parse tree produced by <see cref="BRAQParser.assign"/>.
 	/// <para>The default implementation does nothing.</para>
 	/// </summary>
@@ -130,6 +130,18 @@ public partial class BRAQParserBaseListener : IBRAQParserListener {
 	/// </summary>
 	/// <param name="context">The parse tree.</param>
 	public virtual void ExitAssign([NotNull] BRAQParser.AssignContext context) { }
+	/// <summary>
+	/// Enter a parse tree produced by <see cref="BRAQParser.expr"/>.
+	/// <para>The default implementation does nothing.</para>
+	/// </summary>
+	/// <param name="context">The parse tree.</param>
+	public virtual void EnterExpr([NotNull] BRAQParser.ExprContext context) { }
+	/// <summary>
+	/// Exit a parse tree produced by <see cref="BRAQParser.expr"/>.
+	/// <para>The default implementation does nothing.</para>
+	/// </summary>
+	/// <param name="context">The parse tree.</param>
+	public virtual void ExitExpr([NotNull] BRAQParser.ExprContext context) { }
 	/// <summary>
 	/// Enter a parse tree produced by <see cref="BRAQParser.logical_or"/>.
 	/// <para>The default implementation does nothing.</para>

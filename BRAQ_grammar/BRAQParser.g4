@@ -4,17 +4,19 @@ options {tokenVocab = BRAQLexer; }
 
 program: (stmt*) EOF;
 
-block: LCURLY containing=stmt* RCURLY;
+block: LCURLY containing=stmt* RCURLY | single_stmt=stmt;
 
 stmt: var_stmt
 | expr_stmt
-| containing_if=if_stmt;
+| containing_if=if_stmt
+| while_loop_stmt;
 
 if_stmt: IF cond=expr then_branch=block (ELSE else_branch=block)?;
+while_loop_stmt: WHILE (cond=logical_or)? body=block;
 
 // ID @ (params?) = expr
 var_stmt: VAR id_name=ID (EQUALS assignee=expr)? SEMICOLON;
-expr_stmt: containing=expr SEMICOLON;
+expr_stmt: containing=assign SEMICOLON;
 
 
 
@@ -33,10 +35,11 @@ expr_stmt: containing=expr SEMICOLON;
 //| left=expr op=XOR right=expr
 //;
 
-expr: containing=assign;
 
-assign: id_name=ID EQUALS assignee=logical_or | assignee=logical_or;
 
+assign: id_name=ID EQUALS assignee=expr | assignee=expr; //does not return value
+
+expr: containing=logical_or; // returns value
 
 logical_or: left=logical_or op=OR right=logical_xor | right=logical_xor;
 logical_xor:  left=logical_xor op=XOR right=logical_and | right=logical_and;

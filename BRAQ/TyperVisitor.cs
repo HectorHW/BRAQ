@@ -165,7 +165,8 @@ namespace BRAQ
                     throw new TypeMismatchError();
                 }
             }
-            return right_type;
+            
+            return type_dict[context] = typeof(void);
         }
         #region boring_binary
         public override Type VisitLogical_or(BRAQParser.Logical_orContext context)
@@ -389,6 +390,16 @@ namespace BRAQ
             }
 
             throw new NotImplementedException();
+        }
+
+        public override Type VisitWhile_loop_stmt(BRAQParser.While_loop_stmtContext context)
+        {
+            if (context.cond!=null && context.cond.Accept(this) != typeof(bool))
+            {
+                Console.WriteLine($"Expected {typeof(bool)} in loop condition but got {type_dict[context.cond]} [Line {context.cond.Start.Line}]");
+                throw new TypeMismatchError();
+            }
+            return context.body.Accept(this);
         }
 
         public override Type VisitVar_node(BRAQParser.Var_nodeContext context)

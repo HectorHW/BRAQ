@@ -84,7 +84,7 @@ namespace BRAQ
                 Console.WriteLine($"unknown variable {context.id_name.Text} [Line {context.id_name.Line}]");
                 throw new UnknownVariableException();
             }
-
+            Console.WriteLine($"visited variable {context.id_name.Text} [Line {context.id_name.Line}]");
             var var_definition_point = scope[context.id_name.Text];
             
             if (!assigned[var_definition_point])

@@ -56,6 +56,12 @@ public interface IBRAQParserVisitor<Result> : IParseTreeVisitor<Result> {
 	/// <return>The visitor result.</return>
 	Result VisitIf_stmt([NotNull] BRAQParser.If_stmtContext context);
 	/// <summary>
+	/// Visit a parse tree produced by <see cref="BRAQParser.while_loop_stmt"/>.
+	/// </summary>
+	/// <param name="context">The parse tree.</param>
+	/// <return>The visitor result.</return>
+	Result VisitWhile_loop_stmt([NotNull] BRAQParser.While_loop_stmtContext context);
+	/// <summary>
 	/// Visit a parse tree produced by <see cref="BRAQParser.var_stmt"/>.
 	/// </summary>
 	/// <param name="context">The parse tree.</param>
@@ -68,17 +74,17 @@ public interface IBRAQParserVisitor<Result> : IParseTreeVisitor<Result> {
 	/// <return>The visitor result.</return>
 	Result VisitExpr_stmt([NotNull] BRAQParser.Expr_stmtContext context);
 	/// <summary>
-	/// Visit a parse tree produced by <see cref="BRAQParser.expr"/>.
-	/// </summary>
-	/// <param name="context">The parse tree.</param>
-	/// <return>The visitor result.</return>
-	Result VisitExpr([NotNull] BRAQParser.ExprContext context);
-	/// <summary>
 	/// Visit a parse tree produced by <see cref="BRAQParser.assign"/>.
 	/// </summary>
 	/// <param name="context">The parse tree.</param>
 	/// <return>The visitor result.</return>
 	Result VisitAssign([NotNull] BRAQParser.AssignContext context);
+	/// <summary>
+	/// Visit a parse tree produced by <see cref="BRAQParser.expr"/>.
+	/// </summary>
+	/// <param name="context">The parse tree.</param>
+	/// <return>The visitor result.</return>
+	Result VisitExpr([NotNull] BRAQParser.ExprContext context);
 	/// <summary>
 	/// Visit a parse tree produced by <see cref="BRAQParser.logical_or"/>.
 	/// </summary>

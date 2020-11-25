@@ -90,6 +90,26 @@ namespace BRAQ
             return 0;
         }
 
+        public override int VisitWhile_loop_stmt(BRAQParser.While_loop_stmtContext context)
+        {
+            
+            //сгенерируем условие
+            Label beforeCond = il.DefineLabel();
+            il.MarkLabel(beforeCond); //точка перед условием
+            
+            Label after_loop_body = il.DefineLabel();
+            if (context.cond != null){ // возможно сгенерируем условие
+                context.cond.Accept(this); 
+                il.Emit(OpCodes.Brfalse_S, after_loop_body);
+            }
+
+
+            context.body.Accept(this);
+            il.Emit(OpCodes.Br_S ,beforeCond); // прыгаем к проверке условий
+            il.MarkLabel(after_loop_body); //точка выхода
+            return 0;
+        }
+
         public override int VisitVar_node(BRAQParser.Var_nodeContext context)
         {
             BRAQParser.Var_stmtContext declaration_point = variable_to_declaration[context.id_name];
@@ -97,150 +117,6 @@ namespace BRAQ
             il.Emit(OpCodes.Ldloc, var_id);
             return 0;
         }
-
-        #region old_expr_generator
-
-            
-
-        /*
-        public override int VisitExpr(BRAQParser.ExprContext context)
-        {
-            if (context.ChildCount == 1)
-            {
-                context.GetChild(0).Accept(this);
-                return 0;
-            }
-            
-            if (context.unary_not_op != null)
-            {
-                context.right.Accept(this);
-                il.Emit(OpCodes.Ldc_I4_0);
-                il.Emit(OpCodes.Ceq);
-
-                return 0;
-            }
-            
-            
-            //two -> binary op
-            
-            context.left.Accept(this);
-            if (context.op.Text !="and" && context.op.Text !="or")
-                context.right.Accept(this);
-
-            switch (context.op.Text)
-            {
-                case "+":
-                    if (type_dict[context.left] == typeof(string))
-                    {
-                        il.EmitCall(OpCodes.Call, typeof(string).GetMethod("Concat",
-                            new[] {typeof(string), typeof(string)}) ?? throw new BindError(), null);
-                    }
-                    else
-                    {
-                        il.Emit(OpCodes.Add);
-                    }
-                    
-                    break;
-                case "-":
-                    il.Emit(OpCodes.Sub);
-                    break;
-                case "*":
-                    il.Emit(OpCodes.Mul);
-                    break;
-                case "/":
-                    il.Emit(OpCodes.Div);
-                    break;
-                case "%":
-                    il.Emit(OpCodes.Rem);
-                    break;
-                
-                case ">":
-                    il.Emit(OpCodes.Cgt);
-                    break;
-                case ">=": // a>=b  ~~~ !(a<b) ~~~ (a<b) == 0
-                    il.Emit(OpCodes.Clt);
-                    il.Emit(OpCodes.Ldc_I4_0);
-                    il.Emit(OpCodes.Ceq);
-                    break;
-                case "<":
-                    il.Emit(OpCodes.Clt);
-                    break;
-                case "<=":
-                    il.Emit(OpCodes.Cgt);
-                    il.Emit(OpCodes.Ldc_I4_0);
-                    il.Emit(OpCodes.Ceq);
-                    break;
-
-                case "?=":
-                    if (type_dict[context.left] == typeof(string))
-                    {
-                        il.EmitCall(OpCodes.Call, typeof(string).GetMethod("op_Equality",
-                            new[] {typeof(string), typeof(string)}) ?? throw new BindError(), null);
-                    }
-                    else
-                    {
-                        il.Emit(OpCodes.Ceq);
-                    }
-
-                    break;
-                case "!=":
-                    if (type_dict[context.left] == typeof(string))
-                    {
-                        il.EmitCall(OpCodes.Call, typeof(string).GetMethod("op_Inequality",
-                            new[] {typeof(string), typeof(string)}) ?? throw new BindError(), null);
-                    }
-                    else
-                    {
-                        il.Emit(OpCodes.Ceq);
-                        il.Emit(OpCodes.Ldc_I4_0);
-                        il.Emit(OpCodes.Ceq);
-                    }
-                    break;
-                
-                //Short-circuit
-                case "and":
-                    // если левый оператор ложный, тогда перепрыгиваем, иначе правый
-                    //il.Emit(OpCodes.Ldc_I4_0);
-                    Label falsey = il.DefineLabel(); //stack: left
-                    il.Emit(OpCodes.Brfalse_S, falsey); //stack: 
-                    context.right.Accept(this); //stack: right
-                    Label truthey = il.DefineLabel();
-                    il.Emit(OpCodes.Br_S, truthey); //stack: right
-                    
-                    il.MarkLabel(falsey); //from Brfalse, stack: 
-                    il.Emit(OpCodes.Ldc_I4_0); //stack: 0
-                    il.MarkLabel(truthey); //from br_s, stack: right
-                    break;
-                
-                case "or":
-                    //если левый истинный, тогда прыгаем, иначе правый
-                
-                    Label truthey_or = il.DefineLabel(); //stack: left
-                    il.Emit(OpCodes.Brtrue_S, truthey_or); //stack:
-                    Label falsey_or = il.DefineLabel();
-
-                    context.right.Accept(this); //stack: right
-                    il.Emit(OpCodes.Br_S, falsey_or); //stack: right
-                    
-                    il.MarkLabel(truthey_or); //from brtrue, stack: 
-                    il.Emit(OpCodes.Ldc_I4_1);// stack : 1
-                    
-                    il.MarkLabel(falsey_or); //from br_s, stack: right
-
-                    break;
-                
-                case "xor":
-                    
-                    il.Emit(OpCodes.Ceq);
-                    il.Emit(OpCodes.Ldc_I4_0);
-                    il.Emit(OpCodes.Ceq);
-                    break;
-                    
-            }
-
-            return 0;
-        }*/
-        #endregion
 
         public override int VisitCall(BRAQParser.CallContext context)
         {

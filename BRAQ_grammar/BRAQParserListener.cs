@@ -71,6 +71,16 @@ public interface IBRAQParserListener : IParseTreeListener {
 	/// <param name="context">The parse tree.</param>
 	void ExitIf_stmt([NotNull] BRAQParser.If_stmtContext context);
 	/// <summary>
+	/// Enter a parse tree produced by <see cref="BRAQParser.while_loop_stmt"/>.
+	/// </summary>
+	/// <param name="context">The parse tree.</param>
+	void EnterWhile_loop_stmt([NotNull] BRAQParser.While_loop_stmtContext context);
+	/// <summary>
+	/// Exit a parse tree produced by <see cref="BRAQParser.while_loop_stmt"/>.
+	/// </summary>
+	/// <param name="context">The parse tree.</param>
+	void ExitWhile_loop_stmt([NotNull] BRAQParser.While_loop_stmtContext context);
+	/// <summary>
 	/// Enter a parse tree produced by <see cref="BRAQParser.var_stmt"/>.
 	/// </summary>
 	/// <param name="context">The parse tree.</param>
@@ -91,16 +101,6 @@ public interface IBRAQParserListener : IParseTreeListener {
 	/// <param name="context">The parse tree.</param>
 	void ExitExpr_stmt([NotNull] BRAQParser.Expr_stmtContext context);
 	/// <summary>
-	/// Enter a parse tree produced by <see cref="BRAQParser.expr"/>.
-	/// </summary>
-	/// <param name="context">The parse tree.</param>
-	void EnterExpr([NotNull] BRAQParser.ExprContext context);
-	/// <summary>
-	/// Exit a parse tree produced by <see cref="BRAQParser.expr"/>.
-	/// </summary>
-	/// <param name="context">The parse tree.</param>
-	void ExitExpr([NotNull] BRAQParser.ExprContext context);
-	/// <summary>
 	/// Enter a parse tree produced by <see cref="BRAQParser.assign"/>.
 	/// </summary>
 	/// <param name="context">The parse tree.</param>
@@ -110,6 +110,16 @@ public interface IBRAQParserListener : IParseTreeListener {
 	/// </summary>
 	/// <param name="context">The parse tree.</param>
 	void ExitAssign([NotNull] BRAQParser.AssignContext context);
+	/// <summary>
+	/// Enter a parse tree produced by <see cref="BRAQParser.expr"/>.
+	/// </summary>
+	/// <param name="context">The parse tree.</param>
+	void EnterExpr([NotNull] BRAQParser.ExprContext context);
+	/// <summary>
+	/// Exit a parse tree produced by <see cref="BRAQParser.expr"/>.
+	/// </summary>
+	/// <param name="context">The parse tree.</param>
+	void ExitExpr([NotNull] BRAQParser.ExprContext context);
 	/// <summary>
 	/// Enter a parse tree produced by <see cref="BRAQParser.logical_or"/>.
 	/// </summary>

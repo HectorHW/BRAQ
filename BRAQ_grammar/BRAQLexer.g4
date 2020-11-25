@@ -40,6 +40,11 @@ NEWLINE: ('\n'|'\r')+ -> skip;
 SPACE: [ \t]+ -> skip;
 
 VAR: 'var';
+RETURN: 'return';
+BREAK: 'break';
+CONTINUE: 'continue';
+WHILE: 'while';
+FOR: 'for';
 
 IF: 'if';
 ELSE: 'else';

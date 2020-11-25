@@ -39,5 +39,12 @@ namespace BRAQ
         public static void print(int i) => Console.WriteLine(i);
         public static void print(bool b) => Console.WriteLine(b);
 
+
+        public static void Main()
+        {
+            int a = 0;
+            int b = 3;
+            Console.WriteLine(a+b);
+        }
     }
 }
