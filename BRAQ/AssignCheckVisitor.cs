@@ -1,10 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Diagnostics;
 using System.Linq;
-using System.Runtime.CompilerServices;
 using Antlr4.Runtime;
-using Antlr4.Runtime.Misc;
 
 namespace BRAQ
 {
@@ -24,8 +21,9 @@ namespace BRAQ
         private Dictionary<IToken, BRAQParser.Var_stmtContext> declaration;
         //где была объявлена упомянутая переменная
 
-        private Dictionary<string, BRAQParser.Var_stmtContext> scope;
-        //какие объявления видны в данном участке
+        private Dictionary<string, BRAQParser.Var_stmtContext> outer_scope;
+        private Dictionary<string, BRAQParser.Var_stmtContext> local_scope;
+
         
         
         public AssignCheckVisitor()
@@ -33,7 +31,9 @@ namespace BRAQ
             assigned = new Dictionary<BRAQParser.Var_stmtContext, bool>();
             assigners = new Dictionary<BRAQParser.Var_stmtContext, ParserRuleContext>();
             declaration = new Dictionary<IToken, BRAQParser.Var_stmtContext>();
-            scope = new Dictionary<string, BRAQParser.Var_stmtContext>();
+
+            outer_scope = new Dictionary<string, BRAQParser.Var_stmtContext>();
+            local_scope = new Dictionary<string, BRAQParser.Var_stmtContext>();
         }
 
         public static AssignCheckResult getAssigners(ParserRuleContext context)
@@ -63,8 +63,16 @@ namespace BRAQ
 
         public override int VisitVar_stmt(BRAQParser.Var_stmtContext context)
         {
+            if (local_scope.ContainsKey(context.id_name.Text))
+            {
+                Console.WriteLine($"redeclared local variable {context.id_name.Text} [Line {context.id_name.Line}]");
+                throw new RedeclaredVariableException();
+            }
+            
+            
+            
             assigned[context] = false;
-            scope[context.id_name.Text] = context;
+            local_scope[context.id_name.Text] = context;
 
             if (context.assignee != null)
             {
@@ -77,15 +85,28 @@ namespace BRAQ
             return 0;
         }
 
+        public override int VisitBlock(BRAQParser.BlockContext context)
+        {
+            var prev_outer = outer_scope;
+
+            outer_scope = outer_scope.Concat(local_scope)
+                .GroupBy(x => x.Key)
+                .ToDictionary(x => x.Key, x => x.Last().Value);
+            // создаём словарь, в котором происходит объединение локальных и внешних переменных с возможным замещением
+            
+            local_scope = new Dictionary<string, BRAQParser.Var_stmtContext>();
+            //для блока пока нет локальных переменных
+            
+            base.VisitBlock(context);
+            //scope = outer_scope;
+            local_scope = outer_scope;
+            outer_scope = prev_outer;
+            return 0;
+        }
+
         public override int VisitVar_node(BRAQParser.Var_nodeContext context)
         {
-            if (!scope.ContainsKey(context.id_name.Text))
-            {
-                Console.WriteLine($"unknown variable {context.id_name.Text} [Line {context.id_name.Line}]");
-                throw new UnknownVariableException();
-            }
-            Console.WriteLine($"visited variable {context.id_name.Text} [Line {context.id_name.Line}]");
-            var var_definition_point = scope[context.id_name.Text];
+            TryResolve(context.id_name, out var var_definition_point);
             
             if (!assigned[var_definition_point])
             {
@@ -104,12 +125,7 @@ namespace BRAQ
             context.assignee.Accept(this);
             if (context.id_name == null) return 0;
             
-            if (!scope.ContainsKey(context.id_name.Text))
-            {
-                Console.WriteLine($"unknown variable {context.id_name.Text} [Line {context.id_name.Line}]");
-                throw new UnknownVariableException();
-            }
-            var var_definition_point = scope[context.id_name.Text];
+            TryResolve(context.id_name, out var var_definition_point);
             declaration[context.id_name] = var_definition_point;
             if (!assigned[var_definition_point])
             {
@@ -120,9 +136,29 @@ namespace BRAQ
             return 0;
         }
 
+        private void TryResolve(IToken variable_token, out BRAQParser.Var_stmtContext definition_point)
+        {
+            if (local_scope.ContainsKey(variable_token.Text))
+            {
+                definition_point = local_scope[variable_token.Text];
+            }else if (outer_scope.ContainsKey(variable_token.Text))
+            {
+                definition_point = outer_scope[variable_token.Text];
+            }
+            else
+            {
+                Console.WriteLine($"unknown variable {variable_token.Text} [Line {variable_token.Line}]");
+                throw new UnknownVariableException();
+            }
+        }
+
     }
 
     class UnknownVariableException : Exception
+    {
+    }
+
+    class RedeclaredVariableException : Exception
     {
     }
 }
