@@ -94,27 +94,40 @@ namespace BRAQ
             
             TypeBuilder tpb = module.DefineType(
                 "Program", TypeAttributes.Class);
+            Dictionary<BRAQParser.Function_def_stmtContext, MethodBuilder> methods_to_generate = new Dictionary<BRAQParser.Function_def_stmtContext, MethodBuilder>();
             
-            // the method that will hold our expression code
-            MethodBuilder main = tpb.DefineMethod(
-                "Main", MethodAttributes.Public | MethodAttributes.Static);
+            //create function handles
+            foreach (var func in typerResult)
+            {
+                
+                MethodBuilder mb = tpb.DefineMethod(func.Value.methodInfo.name, MethodAttributes.Public | MethodAttributes.Static,
+                    CallingConventions.Standard,
+                    func.Value.methodInfo.return_type, func.Value.methodInfo.arguments.Select(x => x.b).ToArray());
 
-            ILGenerator il = main.GetILGenerator();
+                methods_to_generate[func.Key] = mb;
+                func.Value.methodInfo.method_builder = mb;
+            }
 
-            ILVisitor visitor = new ILVisitor(il, assigningResults, typerResult);
+            foreach (var m in typerResult.Keys)
+            {
+                var mb = typerResult[m].methodInfo.method_builder;
+                ILGenerator method_il = mb.GetILGenerator();
+                ILVisitor method_visitor = new ILVisitor(method_il, typerResult[m]);
+                m.Accept(method_visitor);
 
-            ast.Accept(visitor);
-
+            }
+            
             Console.WriteLine("generated code");
             
             tpb.CreateType();
-
-
-            asm.SetEntryPoint(main);
+            try
+            {
+                var m = typerResult.First(x => x.Key.id_name.Text == "main");
+                asm.SetEntryPoint(m.Value.methodInfo.method_builder);
+            }catch(InvalidOperationException ignored){}
+            
         
             asm.Save(prefixed_name);
-
-            Console.WriteLine(Predefs.exp(1));
         }
     }
 }

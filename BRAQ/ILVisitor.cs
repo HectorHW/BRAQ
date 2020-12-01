@@ -13,31 +13,46 @@ namespace BRAQ
     {
         private ILGenerator il;
         private Dictionary<IToken, BRAQParser.Var_stmtContext> variable_to_declaration;
-        private readonly BRAQParser.Var_stmtContext[] _varList;
 
+        private readonly BRAQParser.Var_stmtContext[] locals;
+        
         private Dictionary<ParserRuleContext, Type> type_dict;
 
         private Dictionary<IToken, MethodInfo> function_table;
 
+        private Dictionary<IToken, TyperVisitor.OwnMethodInfo> user_function_table;
+
+        private TyperVisitor.TyperResult typerResult; 
         
         //for break&continue generation
         private Label? loop_begin = null;
         private Label? loop_end = null;
 
-        public ILVisitor(ILGenerator il, 
-            //Dictionary<IToken, BRAQParser.Var_stmt_baseContext> dict, 
-            //ArrayList<BRAQParser.Var_stmt_baseContext> var_list, 
-            //Dictionary<ParserRuleContext, Type> type_dict,
-            //Dictionary<IToken, MethodInfo> function_table
-            AssignCheckVisitor.AssignCheckResult assignCheckResult,
+
+        private Label? method_end = null;
+
+        public ILVisitor(ILGenerator il,
             TyperVisitor.TyperResult typerResult
             )
         {
             this.il = il;
-            variable_to_declaration = assignCheckResult.token_to_def;
-            _varList = assignCheckResult.def_to_assign.Select(x => x.Key).ToArray();
-            type_dict = typerResult.expr_type;
-            function_table = typerResult.outer_function_table; //TODO user functions
+            variable_to_declaration = typerResult.var_to_def;
+
+            locals = typerResult.local_defs.ToArray();
+            type_dict = typerResult.type_dict;
+            function_table = typerResult.token_to_outer_function;
+            user_function_table = typerResult.token_to_user_function;
+            current_method = typerResult.methodInfo;
+            this.typerResult = typerResult;
+        }
+
+        private TyperVisitor.OwnMethodInfo current_method;
+        private LocalBuilder return_holder = null;
+
+        public override int VisitStmt(BRAQParser.StmtContext context)
+        {
+            if (context.containing_def != null) return 0; //все объявления функций обрабатываются отдельно
+            return base.VisitStmt(context);
         }
 
         public override int VisitIf_stmt(BRAQParser.If_stmtContext context)
@@ -139,9 +154,20 @@ namespace BRAQ
 
         public override int VisitVar_node(BRAQParser.Var_nodeContext context)
         {
-            BRAQParser.Var_stmtContext declaration_point = variable_to_declaration[context.id_name];
-            int var_id = Array.IndexOf(_varList, declaration_point);
-            il.Emit(OpCodes.Ldloc, var_id);
+            
+            if(variable_to_declaration.ContainsKey(context.id_name)){
+                BRAQParser.Var_stmtContext declaration_point = variable_to_declaration[context.id_name];
+                int var_id = Array.IndexOf(locals, declaration_point);
+                il.Emit(OpCodes.Ldloc, var_id);
+                return 0;
+            }
+
+            int n = current_method.arguments.IndexOf(
+                current_method.arguments.First(x => x.a==context.id_name.Text)
+                );
+                
+            il.Emit(OpCodes.Ldarg, n);
+
             return 0;
         }
 
@@ -161,6 +187,19 @@ namespace BRAQ
 
         public override int VisitCall(BRAQParser.CallContext context)
         {
+            if (user_function_table.ContainsKey(context.calee))
+            {
+                var info = user_function_table[context.calee];
+                
+                foreach (var exprContext in context.expr())
+                {
+                    exprContext.Accept(this);
+                }
+
+                il.EmitCall(OpCodes.Call, info.method_builder, null);
+                return 0;
+            }
+            
             var function_ptr = function_table[context.calee];
             
             foreach (var exprContext in context.expr())
@@ -180,7 +219,7 @@ namespace BRAQ
                 var target_token = context.id_name;
 
                 var assignment_point = variable_to_declaration[target_token];
-                int var_id = Array.IndexOf(_varList, assignment_point);
+                int var_id = Array.IndexOf(locals, assignment_point);
                 if (var_id == -1) throw new Exception();
                 //Console.WriteLine(var_id);
                 //Console.WriteLine(_varList[0]);
@@ -205,13 +244,23 @@ namespace BRAQ
             {
                 context.assignee.Accept(this);
             
+                
+                
                 var target_token = context.id_name;
-            
-                var assignment_point = variable_to_declaration[target_token];
-            
-                int var_id = Array.IndexOf(_varList, assignment_point);
 
-                il.Emit(OpCodes.Stloc, var_id);
+                if (variable_to_declaration.ContainsKey(target_token))
+                {
+                    var assignment_point = variable_to_declaration[target_token];
+            
+                    int var_id = Array.IndexOf(locals, assignment_point);
+
+                    il.Emit(OpCodes.Stloc, var_id);
+                }
+                int n = current_method.arguments.IndexOf(
+                        current_method.arguments.Find(x => context.id_name.Text == x.a));
+                    il.Emit(OpCodes.Starg, n);
+
+                
             }
             else
             {
@@ -452,30 +501,77 @@ namespace BRAQ
 
         public override int VisitShort_call(BRAQParser.Short_callContext context)
         {
-            var function_ptr = function_table[context.calee];
+            
             //one of
             context.c_arg?.Accept(this);
             context.l_arg?.Accept(this);
             context.sc_arg?.Accept(this);
+
+            if (user_function_table.ContainsKey(context.calee))
+            {
+                
+                var info = user_function_table[context.calee];
+
+                il.EmitCall(OpCodes.Call, info.method_builder, null);
+                return 0;
+                
+            }
+
+            var function_ptr = function_table[context.calee];
             
             il.EmitCall(OpCodes.Call, function_ptr, null);
+
             return 0;
         }
 
-        public override int VisitProgram(BRAQParser.ProgramContext context)
+        public override int VisitFunction_def_stmt(BRAQParser.Function_def_stmtContext context)
         {
-            //define variables
-            for (int i = 0; i < _varList.Length; i++)
+            if (current_method == null)
             {
-                //il.DeclareLocal(typeof(int));
-                var T = type_dict[_varList[i]];
-                il.DeclareLocal(T);
+                Console.WriteLine("Huh!?");
+                return 0;
             }
 
-            base.VisitProgram(context);
+            method_end = il.DefineLabel();
 
-            il.Emit(OpCodes.Ret);
+            foreach (var l in locals)
+            {
+                il.DeclareLocal(typerResult.local_types[l]);
+            }
             
+            if (current_method.return_type!=typeof(void))
+            {
+                return_holder = il.DeclareLocal(current_method.return_type);
+            }
+            
+            context.function_body.Accept(this);
+            
+            
+            il.MarkLabel(method_end.Value);
+            
+            if (current_method.return_type!=typeof(void))
+            {
+                il.Emit(OpCodes.Ldloc, return_holder);
+            }
+            
+            il.Emit(OpCodes.Ret);
+            return 0;
+        }
+
+        public override int VisitReturn_stmt(BRAQParser.Return_stmtContext context)
+        {
+            if (current_method == null)
+            {
+                Console.WriteLine("Huh!?");
+                throw new Exception();
+            }
+
+            if (context.return_value != null)
+            {
+                context.return_value.Accept(this);
+                il.Emit(OpCodes.Stloc, return_holder);
+            }
+            il.Emit(OpCodes.Br_S, method_end.Value);
             return 0;
         }
     }

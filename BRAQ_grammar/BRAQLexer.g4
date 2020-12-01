@@ -35,6 +35,7 @@ LCURLY: '{';
 RCURLY: '}';
 
 SEMICOLON: ';';
+COLON: ':';
 
 NEWLINE: ('\n'|'\r')+ -> skip;
 SPACE: [ \t]+ -> skip;
@@ -45,6 +46,7 @@ BREAK: 'break';
 CONTINUE: 'continue';
 WHILE: 'while';
 FOR: 'for';
+DEF: 'def';
 
 IF: 'if';
 ELSE: 'else';

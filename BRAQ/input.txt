@@ -1,6 +1,8 @@
-﻿var a = "outer";
-if(1>0){
-    var a = "inner";
-    print(a);
+﻿def f(a:Int32):Int32{
+    var b = 2+a;
+    return b;
 }
-print(a);
+
+def main{
+    print(f(2));
+}

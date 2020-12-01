@@ -81,6 +81,26 @@ public interface IBRAQParserListener : IParseTreeListener {
 	/// <param name="context">The parse tree.</param>
 	void ExitWhile_loop_stmt([NotNull] BRAQParser.While_loop_stmtContext context);
 	/// <summary>
+	/// Enter a parse tree produced by <see cref="BRAQParser.function_def_stmt"/>.
+	/// </summary>
+	/// <param name="context">The parse tree.</param>
+	void EnterFunction_def_stmt([NotNull] BRAQParser.Function_def_stmtContext context);
+	/// <summary>
+	/// Exit a parse tree produced by <see cref="BRAQParser.function_def_stmt"/>.
+	/// </summary>
+	/// <param name="context">The parse tree.</param>
+	void ExitFunction_def_stmt([NotNull] BRAQParser.Function_def_stmtContext context);
+	/// <summary>
+	/// Enter a parse tree produced by <see cref="BRAQParser.typed_id"/>.
+	/// </summary>
+	/// <param name="context">The parse tree.</param>
+	void EnterTyped_id([NotNull] BRAQParser.Typed_idContext context);
+	/// <summary>
+	/// Exit a parse tree produced by <see cref="BRAQParser.typed_id"/>.
+	/// </summary>
+	/// <param name="context">The parse tree.</param>
+	void ExitTyped_id([NotNull] BRAQParser.Typed_idContext context);
+	/// <summary>
 	/// Enter a parse tree produced by <see cref="BRAQParser.break_stmt"/>.
 	/// </summary>
 	/// <param name="context">The parse tree.</param>
@@ -100,6 +120,16 @@ public interface IBRAQParserListener : IParseTreeListener {
 	/// </summary>
 	/// <param name="context">The parse tree.</param>
 	void ExitContinue_stmt([NotNull] BRAQParser.Continue_stmtContext context);
+	/// <summary>
+	/// Enter a parse tree produced by <see cref="BRAQParser.return_stmt"/>.
+	/// </summary>
+	/// <param name="context">The parse tree.</param>
+	void EnterReturn_stmt([NotNull] BRAQParser.Return_stmtContext context);
+	/// <summary>
+	/// Exit a parse tree produced by <see cref="BRAQParser.return_stmt"/>.
+	/// </summary>
+	/// <param name="context">The parse tree.</param>
+	void ExitReturn_stmt([NotNull] BRAQParser.Return_stmtContext context);
 	/// <summary>
 	/// Enter a parse tree produced by <see cref="BRAQParser.var_stmt"/>.
 	/// </summary>

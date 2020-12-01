@@ -2,7 +2,7 @@
 
 options {tokenVocab = BRAQLexer; }
 
-program: (stmt*) EOF;
+program: (function_def_stmt*) EOF;
 
 block: LCURLY containing=stmt* RCURLY | single_stmt=stmt;
 
@@ -11,13 +11,21 @@ stmt: var_stmt
 | containing_if=if_stmt
 | while_loop_stmt
 | break_stmt
-| continue_stmt;
+| continue_stmt
+| return_stmt
+| containing_def=function_def_stmt;
 
 if_stmt: IF cond=expr then_branch=block (ELSE else_branch=block)?;
 while_loop_stmt: WHILE (cond=logical_or)? body=block;
 
+function_def_stmt: DEF id_name=ID (LBRACKET typed_id* RBRACKET)? (COLON of_type=ID)? function_body=block;
+
+typed_id: id_name=ID COLON type_name=ID;
+
 break_stmt: BREAK SEMICOLON;
 continue_stmt: CONTINUE SEMICOLON;
+
+return_stmt: RETURN (return_value=expr)? SEMICOLON;
 
 // ID @ (params?) = expr
 var_stmt: VAR id_name=ID (EQUALS assignee=expr)? SEMICOLON;
