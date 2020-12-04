@@ -11,6 +11,22 @@ namespace BRAQ
         {
             return x;
         }
+
+        public static double to_double(double x) => x;
+
+        public static double to_double(string x) => Double.Parse(x);
+
+        public static int to_int(double x) => (int)x;
+
+        public static int to_int(int x) => x;
+
+        public static int to_int(string x) => int.Parse(x);
+
+        public static string to_string(int x) => x.ToString();
+        
+        public static string to_string(double x) => x.ToString();
+
+        public static string to_string(string x) => x;
         
         public static double sin(double x)
         {
@@ -39,12 +55,27 @@ namespace BRAQ
         public static void print(int i) => Console.WriteLine(i);
         public static void print(bool b) => Console.WriteLine(b);
 
-
-        public static void Main()
+        public static double constant(string name)
         {
-            int a = 0;
-            int b = 3;
-            Console.WriteLine(a+b);
+            switch (name.ToLower())
+            {
+                case "pi": return Math.PI;
+                case "e": return Math.E;
+            }
+            throw new BRAQRuntimeError($"unknown constant {name}");
+        }
+    }
+
+    public class BRAQRuntimeError : Exception
+    {
+        public BRAQRuntimeError()
+        {
+        }
+
+        public BRAQRuntimeError(string msg)
+        {
+            Console.WriteLine(msg);
+            
         }
     }
 }

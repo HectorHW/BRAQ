@@ -1,8 +1,7 @@
-﻿def f(a:Int32):Int32{
-    var b = 2+a;
-    return b;
+﻿def f(a:Double):Double{
+    return constant("pi")*a;
 }
 
 def main{
-    print(f(2));
+    WriteLine @ f @ double @ ReadLine();
 }
