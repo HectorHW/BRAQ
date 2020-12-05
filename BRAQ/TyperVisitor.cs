@@ -337,7 +337,7 @@ namespace BRAQ
         {
             //TODO user_defined functions
             
-            if (context.calee == null) return context.single.Accept(this);
+            if (context.calee == null) return type_dict[context] = context.single.Accept(this);
             
             if (TryResolveOwnShortMethod(context, out var ownMethodInfo))
             {
@@ -419,7 +419,7 @@ namespace BRAQ
         public override Type VisitDot_notation(BRAQParser.Dot_notationContext context)
         {
             //TODO
-            if (context.basee == null) return context.single_name.Accept(this);
+            if (context.basee == null) return type_dict[context] = context.single_name.Accept(this);
 
             type_dict[context] = context.basee.Accept(this);
 
@@ -429,7 +429,7 @@ namespace BRAQ
 
             dot_prefix_type = null;
             
-            return type_dict[context.target];
+            return type_dict[context] = type_dict[context.target];
         }
 
         public override Type VisitCall(BRAQParser.CallContext context)
@@ -437,7 +437,7 @@ namespace BRAQ
             //TODO
             //get argument list
 
-            if (context.calee == null) return context.single.Accept(this);
+            if (context.calee == null) return type_dict[context] = context.single.Accept(this);
                 
             foreach (var exprContext in context.expr())
             {

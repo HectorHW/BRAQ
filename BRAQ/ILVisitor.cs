@@ -549,7 +549,7 @@ namespace BRAQ
 
             var function_ptr = function_table[context.calee];
             
-            il.EmitCall(function_ptr.IsStatic ? OpCodes.Call : OpCodes.Calli, function_ptr, null);
+            il.EmitCall(OpCodes.Call, function_ptr, null);
 
             return 0;
         }
