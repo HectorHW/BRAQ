@@ -153,6 +153,8 @@ namespace BRAQ
             }else if (TryResolveAsArg(context.id_name, out var argumentDefinition))
             {
                 token_to_argument[context.id_name] = argumentDefinition;
+            }else if (PredefsHelper.ResolveType(context.id_name.Text) != null)
+            {
             }
             else
             {

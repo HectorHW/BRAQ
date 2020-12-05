@@ -36,6 +36,7 @@ RCURLY: '}';
 
 SEMICOLON: ';';
 COLON: ':';
+DOT: '.';
 
 NEWLINE: ('\n'|'\r')+ -> skip;
 SPACE: [ \t]+ -> skip;

@@ -31,24 +31,8 @@ return_stmt: RETURN (return_value=expr)? SEMICOLON;
 var_stmt: VAR id_name=ID (EQUALS assignee=expr)? SEMICOLON;
 expr_stmt: containing=assign SEMICOLON;
 
-
-
-
-//expr: num=literal
-//| call_exr=call
-//| grouping=group
-//| left=expr op=MODULUS right=expr
-//| left=expr op=(STAR|SLASH) right=expr
-//| left=expr op=(PLUS|MINUS) right=expr
-//| left=expr op=(GR|GE|LS|LE) right=expr
-//| left=expr op=(EQ|NE) right=expr
-//| unary_not_op=NOT right=expr
-//| left=expr op=AND right=expr
-//| left=expr op=OR right=expr
-//| left=expr op=XOR right=expr
-//;
-
-
+//TODO dot notation (Console.Method(), "abc".Method())
+//TODO backslash call f@1\WriteLine => WriteLine(f(1))
 
 assign: id_name=ID EQUALS assignee=expr | assignee=expr; //does not return value
 
@@ -62,10 +46,14 @@ logical_gr_le:  left=addition op=(GR|GE|LS|LE) right=addition | right=addition;
 addition:  left=addition op=(PLUS|MINUS) right=multiplication | right=multiplication;
 multiplication:  left=multiplication op=(STAR|SLASH|MODULUS) right=unary_not_neg 
 | right=unary_not_neg;
-unary_not_neg: op=(NOT|MINUS) (right_short_call=short_call | right_call=call | right_literal=literal) 
-| (right_short_call=short_call | right_call=call | right_literal=literal);
-call: calee=ID LBRACKET expr* RBRACKET;
-short_call: calee=ID AT_OPERATOR (sc_arg=short_call|c_arg=call|l_arg=literal);
+unary_not_neg: op=(NOT|MINUS) right=dot_notation
+| right=dot_notation;
+
+dot_notation: basee=dot_notation (DOT target=call)| single_name=call;
+
+call: calee=ID LBRACKET expr* RBRACKET | single=short_call;
+
+short_call: calee=ID AT_OPERATOR (arg=dot_notation) | single=literal;
 
 
 

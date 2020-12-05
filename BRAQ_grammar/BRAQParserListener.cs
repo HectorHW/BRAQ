@@ -251,6 +251,16 @@ public interface IBRAQParserListener : IParseTreeListener {
 	/// <param name="context">The parse tree.</param>
 	void ExitUnary_not_neg([NotNull] BRAQParser.Unary_not_negContext context);
 	/// <summary>
+	/// Enter a parse tree produced by <see cref="BRAQParser.dot_notation"/>.
+	/// </summary>
+	/// <param name="context">The parse tree.</param>
+	void EnterDot_notation([NotNull] BRAQParser.Dot_notationContext context);
+	/// <summary>
+	/// Exit a parse tree produced by <see cref="BRAQParser.dot_notation"/>.
+	/// </summary>
+	/// <param name="context">The parse tree.</param>
+	void ExitDot_notation([NotNull] BRAQParser.Dot_notationContext context);
+	/// <summary>
 	/// Enter a parse tree produced by <see cref="BRAQParser.call"/>.
 	/// </summary>
 	/// <param name="context">The parse tree.</param>

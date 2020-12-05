@@ -74,6 +74,11 @@ namespace BRAQ
 
         private List<OwnMethodInfo> user_functions;
         
+        //for dot notation
+        
+        string dottted_prefix = null;
+        private Type dot_prefix_type = null;
+        
         public class TyperResult
         {
             public Dictionary<ParserRuleContext, Type> type_dict = new Dictionary<ParserRuleContext, Type>(); // including var_def
@@ -298,23 +303,7 @@ namespace BRAQ
         public override Type VisitUnary_not_neg(BRAQParser.Unary_not_negContext context)
         {
             //right: right_short_call=short_call | right_call=call | right_literal=literal
-            Type right_type;
-            if (context.right_short_call != null)
-            {
-                right_type = context.right_short_call.Accept(this);
-            }
-            else if (context.right_call != null)
-            {
-                right_type = context.right_call.Accept(this);
-            }
-            else if (context.right_literal != null)
-            {
-                right_type = context.right_literal.Accept(this);
-            }
-            else
-            {
-                throw new NotImplementedException();
-            }
+            Type right_type = context.right.Accept(this);
 
             if (context.op != null)
             {
@@ -348,6 +337,8 @@ namespace BRAQ
         {
             //TODO user_defined functions
             
+            if (context.calee == null) return context.single.Accept(this);
+            
             if (TryResolveOwnShortMethod(context, out var ownMethodInfo))
             {
                 result_box.token_to_user_function[context.calee] = ownMethodInfo;
@@ -357,27 +348,15 @@ namespace BRAQ
             
             //get argument type
             Type argument_type;
-            if (context.c_arg != null)
-            {
-                argument_type = context.c_arg.Accept(this);
-            }else if (context.sc_arg != null)
-            {
-                argument_type = context.sc_arg.Accept(this);
-            }else if (context.l_arg != null)
-            {
-                argument_type = context.l_arg.Accept(this);
-            }
-            else
-            {
-                throw new NotImplementedException();
-            }
+            argument_type = context.arg.Accept(this);
             
             
 
             Type[] types = {argument_type};
             IToken function_token = context.calee;
             
-            MethodInfo predef_function_info = PredefsHelper.Resolve(function_token.Text, types);
+            
+            MethodInfo predef_function_info = PredefsHelper.Resolve(dot_prefix_type, function_token.Text, types);
             
             if (predef_function_info != null)
             {
@@ -436,13 +415,29 @@ namespace BRAQ
             
             return type_dict[context] = type_dict[context.containing];
         }
-        
+
+        public override Type VisitDot_notation(BRAQParser.Dot_notationContext context)
+        {
+            //TODO
+            if (context.basee == null) return context.single_name.Accept(this);
+
+            type_dict[context] = context.basee.Accept(this);
+
+            dot_prefix_type = type_dict[context];
+
+            context.target.Accept(this);
+
+            dot_prefix_type = null;
+            
+            return type_dict[context.target];
+        }
+
         public override Type VisitCall(BRAQParser.CallContext context)
         {
             //TODO
             //get argument list
 
-            
+            if (context.calee == null) return context.single.Accept(this);
                 
             foreach (var exprContext in context.expr())
             {
@@ -463,7 +458,7 @@ namespace BRAQ
             }
 
             //MethodInfo predef_function_info = typeof(Predefs).GetMethod(function_token.Text, types);
-            MethodInfo predef_function_info = PredefsHelper.Resolve(function_token.Text, types);
+            MethodInfo predef_function_info = PredefsHelper.Resolve(dot_prefix_type, function_token.Text, types);
             
             if (predef_function_info != null)
             {
@@ -541,10 +536,24 @@ namespace BRAQ
                 Type t = locals_type[def_point];
                 return type_dict[context] = t;
             }
-            
+
             try
             {
                 return type_dict[context] = result_box.argtypes[context.id_name.Text];
+            }
+            catch (InvalidOperationException)
+            {
+            }
+            catch (KeyNotFoundException)
+            {
+            }
+
+            try
+            {
+
+                Type t = PredefsHelper.ResolveType(context.id_name.Text);
+                if (t == null) throw new InvalidOperationException();
+                return type_dict[context] = t;
             }
             catch (InvalidOperationException)
             {
@@ -636,20 +645,7 @@ namespace BRAQ
             //найдём аргумент
             List<Type> args;
             Type argument_type;
-            if (context.c_arg != null)
-            {
-                argument_type = context.c_arg.Accept(this);
-            }else if (context.sc_arg != null)
-            {
-                argument_type = context.sc_arg.Accept(this);
-            }else if (context.l_arg != null)
-            {
-                argument_type = context.l_arg.Accept(this);
-            }
-            else
-            {
-                throw new NotImplementedException();
-            }
+            argument_type = context.arg.Accept(this);
 
             args = new List<Type>(new[] {argument_type});
 
@@ -672,6 +668,25 @@ namespace BRAQ
             }
         }
         
+    }
+
+
+    class ResolveDotNotation : BRAQParserBaseVisitor<Type>
+    {
+        public override Type VisitDot_notation(BRAQParser.Dot_notationContext context)
+        {
+            return base.VisitDot_notation(context);
+        }
+
+        public override Type VisitCall(BRAQParser.CallContext context)
+        {
+            return base.VisitCall(context);
+        }
+
+        public override Type VisitShort_call(BRAQParser.Short_callContext context)
+        {
+            return base.VisitShort_call(context);
+        }
     }
 
 

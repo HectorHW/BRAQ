@@ -15,11 +15,19 @@ namespace BRAQ
             hack["int"] = "to_int";
             hack["string"] = "to_string";
         }
+
+
+
+        public static Type ResolveType(string type_name)
+        {
+            var initial_attempt = Type.GetType(type_name);
+            if (initial_attempt != null) return initial_attempt;
+            
+            var system_attempt = Type.GetType($"System.{type_name}");
+            return system_attempt;
+        }
         
-        
-        
-        
-        public static MethodInfo Resolve(string method_name, Type[] arguments)
+        public static MethodInfo Resolve(Type base_name, string method_name, Type[] arguments)
         {
             if (hack.ContainsKey(method_name))
             {
@@ -30,6 +38,14 @@ namespace BRAQ
             if (initial_attempt != null) return initial_attempt;
             
             //not found in my predefs
+
+            if (base_name != null)
+            {
+                var dotted_attempt = base_name.GetMethod(method_name, arguments);
+                return dotted_attempt;
+            }
+            
+            
             //try Console
             
             var console_attempt = typeof(Console).GetMethod(method_name, arguments);

@@ -3,5 +3,5 @@
 }
 
 def main{
-    WriteLine @ f @ double @ ReadLine();
+    Console.WriteLine("abc".Contains("a"));
 }

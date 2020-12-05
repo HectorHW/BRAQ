@@ -185,8 +185,34 @@ namespace BRAQ
             return 0;
         }
 
+        public override int VisitDot_notation(BRAQParser.Dot_notationContext context)
+        {
+            if (context.basee == null) return context.single_name.Accept(this);
+            MethodInfo mi = function_table[GetDeepToken(context.target)];
+            if (!mi.IsStatic)
+            {
+                context.basee.Accept(this);    
+            }
+            context.target.Accept(this);
+            return 0;
+        }
+
+        private IToken GetDeepToken(BRAQParser.CallContext context)
+        {
+            if (context.calee != null) return context.calee;
+            return GetDeepToken(context.single);
+        }
+
+        private IToken GetDeepToken(BRAQParser.Short_callContext context)
+        {
+            if (context.calee != null) return context.calee;
+            return context.single.var_node_.id_name;
+        }
+
         public override int VisitCall(BRAQParser.CallContext context)
         {
+            if (context.calee==null) return context.single.Accept(this);
+            
             if (user_function_table.ContainsKey(context.calee))
             {
                 var info = user_function_table[context.calee];
@@ -206,7 +232,16 @@ namespace BRAQ
             {
                 exprContext.Accept(this);
             }
-            il.EmitCall(OpCodes.Call, function_ptr, null);
+
+            if (function_ptr.IsStatic)
+            {
+                il.EmitCall(OpCodes.Call, function_ptr, null);
+            }
+            else
+            {
+                il.EmitCall(OpCodes.Call, function_ptr, null);
+            }
+
             return 0;
         }
         
@@ -478,10 +513,7 @@ namespace BRAQ
 
         public override int VisitUnary_not_neg(BRAQParser.Unary_not_negContext context)
         {
-            //one of
-            context.right_call?.Accept(this);
-            context.right_literal?.Accept(this);
-            context.right_short_call?.Accept(this);
+            context.right.Accept(this);
             if (context.op != null)
             {
                 switch (context.op.Text)
@@ -501,11 +533,9 @@ namespace BRAQ
 
         public override int VisitShort_call(BRAQParser.Short_callContext context)
         {
-            
+            if (context.calee==null) return context.single.Accept(this);
             //one of
-            context.c_arg?.Accept(this);
-            context.l_arg?.Accept(this);
-            context.sc_arg?.Accept(this);
+            context.arg.Accept(this);
 
             if (user_function_table.ContainsKey(context.calee))
             {
@@ -519,7 +549,7 @@ namespace BRAQ
 
             var function_ptr = function_table[context.calee];
             
-            il.EmitCall(OpCodes.Call, function_ptr, null);
+            il.EmitCall(function_ptr.IsStatic ? OpCodes.Call : OpCodes.Calli, function_ptr, null);
 
             return 0;
         }
