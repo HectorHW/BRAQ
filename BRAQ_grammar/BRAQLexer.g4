@@ -48,6 +48,7 @@ CONTINUE: 'continue';
 WHILE: 'while';
 FOR: 'for';
 DEF: 'def';
+IMPORT: 'import';
 
 IF: 'if';
 ELSE: 'else';

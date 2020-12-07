@@ -2,7 +2,9 @@
 
 options {tokenVocab = BRAQLexer; }
 
-program: (function_def_stmt*) EOF;
+program: imports* (function_def_stmt*) EOF;
+
+imports: IMPORT containing=dot_notation SEMICOLON;
 
 block: LCURLY containing=stmt* RCURLY | single_stmt=stmt;
 

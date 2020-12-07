@@ -27,6 +27,8 @@ namespace BRAQ
 
         private Dictionary<string, BRAQParser.Typed_idContext> function_argument_scope;
         private Dictionary<IToken, BRAQParser.Typed_idContext> token_to_argument;
+
+        protected List<Type> imported_types;
         
         bool inside_function = false;
         
@@ -68,12 +70,13 @@ namespace BRAQ
             return 0;
         }
 
-        public static Dictionary<BRAQParser.Function_def_stmtContext, AssignCheckResult> getAssigners(ParserRuleContext context)
+        public static Dictionary<BRAQParser.Function_def_stmtContext, AssignCheckResult> getAssigners(ParserRuleContext context, List<Type> imported_names)
         {
             var answ = new Dictionary<BRAQParser.Function_def_stmtContext, AssignCheckResult>();
             foreach (var fdef in ((BRAQParser.ProgramContext) context).function_def_stmt())
             {
                 var v = new AssignCheckVisitor();
+                v.imported_types = imported_names;
                 fdef.Accept(v);
                 
                 if (v.assigned.ContainsValue(false))
@@ -153,7 +156,7 @@ namespace BRAQ
             }else if (TryResolveAsArg(context.id_name, out var argumentDefinition))
             {
                 token_to_argument[context.id_name] = argumentDefinition;
-            }else if (PredefsHelper.ResolveType(context.id_name.Text) != null)
+            }else if (PredefsHelper.ResolveType(context.id_name.Text, imported_types) != null)
             {
             }
             else

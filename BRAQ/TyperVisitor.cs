@@ -73,6 +73,7 @@ namespace BRAQ
         private Dictionary<IToken, BRAQParser.Var_stmtContext> var_to_local_def;
 
         private List<OwnMethodInfo> user_functions;
+        private List<Type> imported_names;
         
         //for dot notation
         
@@ -105,7 +106,8 @@ namespace BRAQ
 
         public static Dictionary<BRAQParser.Function_def_stmtContext, TyperResult>
             solveTypes(BRAQParser.ProgramContext context, 
-                Dictionary<BRAQParser.Function_def_stmtContext, AssignCheckVisitor.AssignCheckResult> step1_result)
+                Dictionary<BRAQParser.Function_def_stmtContext, AssignCheckVisitor.AssignCheckResult> step1_result,
+                List<Type> imported_names)
         {
             var answ = new Dictionary<BRAQParser.Function_def_stmtContext, TyperResult>();
             var user_functions = new List<OwnMethodInfo>();
@@ -133,6 +135,7 @@ namespace BRAQ
             foreach (var fdef in step1_result)
             {
                 var v = new TyperVisitor(answ[fdef.Key], fdef.Value.def_to_assign, user_functions);
+                v.imported_names = imported_names;
                 fdef.Key.Accept(v);
             }
 
@@ -418,7 +421,7 @@ namespace BRAQ
 
         public override Type VisitDot_notation(BRAQParser.Dot_notationContext context)
         {
-            //TODO
+            //TODO multiple dots (System.IO.FIle.Create())
             if (context.basee == null) return type_dict[context] = context.single_name.Accept(this);
 
             type_dict[context] = context.basee.Accept(this);
@@ -551,7 +554,7 @@ namespace BRAQ
             try
             {
 
-                Type t = PredefsHelper.ResolveType(context.id_name.Text);
+                Type t = PredefsHelper.ResolveType(context.id_name.Text, imported_names);
                 if (t == null) throw new InvalidOperationException();
                 return type_dict[context] = t;
             }

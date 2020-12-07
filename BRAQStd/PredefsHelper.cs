@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Reflection;
 
 namespace BRAQ
@@ -18,13 +19,23 @@ namespace BRAQ
 
 
 
-        public static Type ResolveType(string type_name)
+        public static Type ResolveType(string type_name, List<Type> imported_names)
         {
             var initial_attempt = Type.GetType(type_name);
             if (initial_attempt != null) return initial_attempt;
-            
+
             var system_attempt = Type.GetType($"System.{type_name}");
-            return system_attempt;
+            if (system_attempt!=null) return system_attempt;
+            try
+            {
+                var import_attempt = imported_names.First(x => x.Name == type_name);
+                return import_attempt;
+
+            }
+            catch (InvalidOperationException e)
+            {
+                return null;
+            }
         }
         
         public static MethodInfo Resolve(Type base_name, string method_name, Type[] arguments)

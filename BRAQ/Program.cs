@@ -57,9 +57,11 @@ namespace BRAQ
             }
             */
 
-            var assigningResults = AssignCheckVisitor.getAssigners(ast);
+            var imported_names = ImportVisitor.GetImports(ast);
+
+            var assigningResults = AssignCheckVisitor.getAssigners(ast, imported_names);
             
-            var typerResult = TyperVisitor.solveTypes(ast, assigningResults);
+            var typerResult = TyperVisitor.solveTypes(ast, assigningResults, imported_names);
 
             //var type_dict = solving.a;
             //Dictionary<IToken, MethodInfo> function_table = solving.b;

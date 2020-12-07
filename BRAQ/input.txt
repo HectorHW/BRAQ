@@ -1,7 +1,11 @@
-﻿def f(a:Double):Double{
+﻿import System.IO.File;
+
+def f(a:Double):Double{
     return constant("pi")*a;
 }
 
 def main{
-    Console.WriteLine("abc".Contains@"a");
+    WriteLine@"enter text to write to file";
+    var s = ReadLine();
+    File.WriteAllText("out.txt" s);
 }
