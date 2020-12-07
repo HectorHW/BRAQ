@@ -26,12 +26,13 @@ namespace BRAQ
             try
             {
                 Type t = Type.GetType(context.containing.GetText());
+                if(t==null) throw new BindError();
                 this._imported_names.Add(t);
                 return 0;
             }
-            catch (Exception e)
+            catch (BindError e)
             {
-                Console.WriteLine(e.GetType());
+                Console.WriteLine($"unknown name {context.containing.GetText()} [Line {context.Stop.Line}]");
                 throw e;
             }
         }
