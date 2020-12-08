@@ -37,44 +37,12 @@ namespace BRAQ
             var parser = new BRAQParser(tokenStream);
         
             var ast = parser.program();
-            
-            /*
-            
-            var dict_arr_pair = ast.Accept(new VariableResolverVisitor());
-
-            Dictionary<IToken, BRAQParser.Var_stmtContext> mention_to_def = dict_arr_pair.a;
-            ArrayList<BRAQParser.Var_stmtContext> var_list = dict_arr_pair.b;
-
-            Console.WriteLine(var_list.Count);
-            Console.WriteLine(mention_to_def.Count);
-
-            foreach (var keyValuePair in mention_to_def)
-            {
-                var id = keyValuePair.Value.ToStringTree();
-                IToken t = keyValuePair.Key;
-
-                Console.WriteLine("{0} {1} {2} : {3}", t.Text, t.Line, t.Column, id);
-            }
-            */
 
             var imported_names = ImportVisitor.GetImports(ast);
 
             var assigningResults = AssignCheckVisitor.getAssigners(ast, imported_names);
             
             var typerResult = TyperVisitor.solveTypes(ast, assigningResults, imported_names);
-
-            //var type_dict = solving.a;
-            //Dictionary<IToken, MethodInfo> function_table = solving.b;
-            
-            /*
-            foreach (var keyValuePair in type_dict)
-            {
-                //if (keyValuePair.Key.GetType() == typeof(BRAQParser.Var_stmt_baseContext))
-                
-                    Console.WriteLine(keyValuePair.Value);
-                
-            }*/
-            
             
 
             Console.WriteLine("solved types and functions");

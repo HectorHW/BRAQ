@@ -118,8 +118,8 @@ namespace BRAQ
 
                 tr.methodInfo = new OwnMethodInfo(
                     fdef.Key.id_name.Text, 
-                    fdef.Key.typed_id().Select(x=> new Pair<string, Type>(x.id_name.Text,string_to_type(x.type_name.Text))).ToList(), 
-                    fdef.Key.of_type!=null ? string_to_type(fdef.Key.of_type.Text): typeof(void),
+                    fdef.Key.typed_id().Select(x=> new Pair<string, Type>(x.id_name.Text,string_to_type(x.type_name.Text, imported_names))).ToList(), 
+                    fdef.Key.of_type!=null ? string_to_type(fdef.Key.of_type.Text, imported_names): typeof(void),
                     fdef.Key
                     );
 
@@ -150,7 +150,7 @@ namespace BRAQ
 
         public override Type VisitTyped_id(BRAQParser.Typed_idContext context)
         {
-            return type_dict[context] = string_to_type(context.type_name.Text);
+            return type_dict[context] = string_to_type(context.type_name.Text, this.imported_names);
         }
 
         public override Type VisitExpr(BRAQParser.ExprContext context)
@@ -312,14 +312,11 @@ namespace BRAQ
             {
                 try
                 {
-                    Console.WriteLine(context.op.Text);
-                    Console.WriteLine(right_type);
-                    
+
                     var type_pair = TypeAllowances
                         .Find(x => 
                             x.Equals(new TypeHelper(null, right_type, context.op.Text, null)));
                     type_dict[context] = type_pair.result;
-                    Console.WriteLine(type_pair.result);
                     return type_dict[context];
                 }
                 catch(ArgumentNullException )
@@ -447,7 +444,6 @@ namespace BRAQ
                 exprContext.Accept(this);
             }
             
-            Console.WriteLine(context.expr().Length);
             Type[] types = context.expr().Select(x => type_dict[x]).ToArray();
             
 
@@ -576,13 +572,9 @@ namespace BRAQ
             }
             try
             {
-                Console.WriteLine(left_type);
-                Console.WriteLine(op.Text);
-                Console.WriteLine(right_type);
                 var type_pair = TypeAllowances
                     .Find(x => 
                         x.Equals(new TypeHelper(left_type, right_type, op.Text, null)));
-                Console.WriteLine(type_pair.result);
                 return type_pair.result;
             }
             catch(ArgumentNullException )
@@ -613,9 +605,10 @@ namespace BRAQ
 
         }
 
-        private static Type string_to_type(string name)
+        private static Type string_to_type(string name, List<Type> imported_names)
         {
-            return Type.GetType($"System.{name}");
+            return PredefsHelper.ResolveType(name, imported_names);
+            
         }
 
         private bool TryResolveOwnMethod(BRAQParser.CallContext context, out OwnMethodInfo ownMethodInfo)
@@ -672,27 +665,7 @@ namespace BRAQ
         }
         
     }
-
-
-    class ResolveDotNotation : BRAQParserBaseVisitor<Type>
-    {
-        public override Type VisitDot_notation(BRAQParser.Dot_notationContext context)
-        {
-            return base.VisitDot_notation(context);
-        }
-
-        public override Type VisitCall(BRAQParser.CallContext context)
-        {
-            return base.VisitCall(context);
-        }
-
-        public override Type VisitShort_call(BRAQParser.Short_callContext context)
-        {
-            return base.VisitShort_call(context);
-        }
-    }
-
-
+    
     public class TypeMismatchError : Exception
     {
         public string msg { get; set; }
@@ -714,10 +687,5 @@ namespace BRAQ
 
     public class TypesolvingError : Exception
     {
-       /* public Dictionary<string, bool> dict;
-        public TypesolvingError(Dictionary<string, bool> assigned)
-        {
-            dict = assigned;
-        }*/
     }
 }

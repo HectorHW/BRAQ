@@ -1,9 +1,5 @@
 ﻿import System.IO.File;
 
-def f(a:Double):Double{
-    return constant("pi")*a;
-}
-
 def main{
     WriteLine@"enter text to write to file";
     var s = ReadLine();
